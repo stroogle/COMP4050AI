@@ -14,8 +14,8 @@ async function callOpenAI() {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o', // Use a compatible chat model like 'gpt-3.5-turbo'
       messages: [
-        { role: 'system', content: 'You are a helpful assistant.' },
-        { role: 'user', content: 'Say this is a test' }
+        { role: 'system', content: 'You read through entire pdf files and create five short questions and two open ended questions with answers form it .Anwsers need to be altleaset 8 minutes long to answer. You say- Please upload a pdf document ' },
+        { role: 'user', content: 'Uploads a pdf documet' }
       ],
       max_tokens: 50, // The maximum number of tokens to generate in the response
     });
