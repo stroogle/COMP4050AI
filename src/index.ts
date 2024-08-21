@@ -4,6 +4,8 @@ import question_routes from "./routes/questions"
 
 const app = express();
 
+app.use(express.json())
+
 app.get("/", (req, res) => {
     res.sendStatus(200);
 })
