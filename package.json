@@ -13,11 +13,26 @@
     "dependencies": {
         "dotenv": "^16.4.5",
         "express": "^4.19.2",
-        "openai": "^4.55.7"
+        "glob": "^11.0.0",
+        "node-notifier": "^10.0.1",
+        "openai": "^4.55.7",
+        "pdf-parse": "^1.1.1",
+        "request": "^2.88.2",
+        "tough-cookie": "^4.1.4"
     },
     "devDependencies": {
+<<<<<<< Updated upstream
         "@types/express": "^4.17.21",
         "@types/node": "^22.3.0",
+=======
+        "@babel/preset-env": "^7.25.3",
+        "@babel/preset-typescript": "^7.24.7",
+        "@jest/types": "^29.6.3",
+        "@types/express": "^4.17.21",
+        "@types/jest": "^28.1.6",
+        "@types/node": "^22.3.0",
+        "jest": "^25.0.0",
+>>>>>>> Stashed changes
         "nodemon": "^3.1.4",
         "ts-node": "^10.9.2",
         "typescript": "^5.5.4"
