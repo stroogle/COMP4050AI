@@ -14,7 +14,12 @@
         "class-validator": "^0.14.1",
         "dotenv": "^16.4.5",
         "express": "^4.19.2",
-        "openai": "^4.55.7"
+        "glob": "^11.0.0",
+        "node-notifier": "^10.0.1",
+        "openai": "^4.55.7",
+        "pdf-parse": "^1.1.1",
+        "request": "^2.88.2",
+        "tough-cookie": "^4.1.4"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.25.3",
