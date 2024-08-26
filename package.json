@@ -27,6 +27,7 @@
         "@types/express": "^4.17.21",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         "@types/node": "^22.3.0",
 =======
         "@types/jest": "^29.5.12",
@@ -38,6 +39,11 @@
         "@types/node": "^22.3.0",
         "jest": "^29.7.0",
 >>>>>>> 7ad8378 (validation for request body added)
+=======
+        "@types/jest": "^29.5.12",
+        "@types/node": "^22.3.0",
+        "jest": "^29.7.0",
+>>>>>>> 30efa5cc0f6f2b0b608ef6dc7ff5a58c8edb8ccf
         "nodemon": "^3.1.4",
         "ts-node": "^10.9.2",
         "typescript": "^5.5.4"
