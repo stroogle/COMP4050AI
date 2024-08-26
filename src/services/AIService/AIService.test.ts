@@ -8,7 +8,7 @@ describe("Verify that AI Services runs as expected.", () => {
         let number_of_questions = 6;
         let responses = await ai.getQuestions(number_of_questions, "123");
 
-        expect(responses).toBeInstanceOf("string");
+        expect(typeof responses == "string").toBe(true);
     })
 
 })

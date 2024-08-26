@@ -6,19 +6,19 @@ export class AIService implements AI {
 
 
     constructor(access_key: string){
-        this.openai = new OpenAI({
-            apiKey: access_key
-        })
+        console.log(access_key)
+        this.openai = new OpenAI()
     }
 
     async getQuestions(number_of_questions: number, file_id: string): Promise<string> {
         const response = await this.openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4o-mini",
             messages: [
                 {role: "user", content: "Hello"},
             ],
             max_tokens: 50
         }).catch(error => {
+            console.log(error)
             throw new Error("Failed to get a response.");
         })
 
