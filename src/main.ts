@@ -21,11 +21,11 @@ async function main() {
   try {
     // Step 1: Read the PDF file
     const pdfContent = await pdfReader.readPDF(filePath);
-    console.log('PDF Content:', pdfContent);
+    //console.log('PDF Content:', pdfContent);
 
     // Step 2: Generate questions and answers based on the PDF content
     const generatedText = await openAIHandler.generateQuestionsAndAnswers(pdfContent);
-    console.log('Generated Questions and Answers:', generatedText);
+    //console.log('Generated Questions and Answers:', generatedText);
 
     // Step 3: Determine the next file number
     const resultDir = './results';
