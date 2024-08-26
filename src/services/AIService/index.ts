@@ -11,8 +11,18 @@ export class AIService implements AI {
         })
     }
 
-    async getQuestions(number_of_questions: number, file_id: string): Promise<string[]> {
-        throw new Error("Method not implemented.");
+    async getQuestions(number_of_questions: number, file_id: string): Promise<string> {
+        const response = await this.openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+                {role: "user", content: "Hello"},
+            ],
+            max_tokens: 50
+        }).catch(error => {
+            throw new Error("Failed to get a response.");
+        })
+
+        return response.choices[0].message.content?.trim() as string;
     }
     
 }
