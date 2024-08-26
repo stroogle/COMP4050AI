@@ -9,7 +9,7 @@ async function main() {
   const pdfReader = new PDFReader();
   const openAIHandler = new OpenAIHandler(process.env.OPENAI_API_KEY || '');
 
-  const filePath = 'PDFfiles'; // Replace with your actual PDF file path
+  const filePath = 'PDFfiles/sample.pdf'; // Replace with your actual PDF file path
 
   try {
     // Step 1: Read the PDF file

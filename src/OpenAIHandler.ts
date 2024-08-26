@@ -9,7 +9,7 @@ export class OpenAIHandler {
 
   async generateQuestionsAndAnswers(pdfContent: string): Promise<string> {
     const response = await this.openai.chat.completions.create({
-      model: 'gpt-4', // Make sure to use the correct model name like 'gpt-4'
+      model: 'gpt-4o', // Make sure to use the correct model name like 'gpt-4'
       messages: [
         { role: 'system', content: 'You read through entire pdf files and create five short questions and two open-ended questions with answers from it. Answers need to be at least 8 minutes long to answer.' },
         { role: 'user', content: `Here is the content of the PDF: ${pdfContent}` }
