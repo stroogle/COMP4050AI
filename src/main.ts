@@ -4,7 +4,9 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-// Load environment variables
+// Make the file a module by adding export {}
+export {};
+
 dotenv.config();
 
 async function main() {
@@ -19,15 +21,12 @@ async function main() {
   }
 
   try {
-    // Step 1: Read the PDF file
     const pdfContent = await pdfReader.readPDF(filePath);
-    console.log('PDF Content:', pdfContent);
+   // console.log('PDF Content:', pdfContent);
 
-    // Step 2: Generate questions and answers based on the PDF content
-    const generatedText = await aiService.generateQuestionsFromPDFContent(pdfContent);
+    const generatedText = await aiService.getQuestions(5, pdfContent); // Generate 5 questions
     console.log('Generated Questions and Answers:', generatedText);
 
-    // Step 3: Save the generated text to a file
     saveGeneratedText(generatedText);
 
   } catch (error) {
