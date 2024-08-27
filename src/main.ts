@@ -1,15 +1,15 @@
 import { PDFReader } from './PDFReader';
-import { OpenAIHandler } from './OpenAIHandler';
+import { AIService } from './services/AIService';
 import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-// Load environment variables from .env file
+// Load environment variables
 dotenv.config();
 
 async function main() {
   const pdfReader = new PDFReader();
-  const openAIHandler = new OpenAIHandler(process.env.OPENAI_API_KEY || '');
+  const aiService = new AIService(process.env.OPENAI_API_KEY || '');
 
   const filePath = 'PDFfiles/sample.pdf'; // Replace with your actual PDF file path
 
@@ -21,30 +21,32 @@ async function main() {
   try {
     // Step 1: Read the PDF file
     const pdfContent = await pdfReader.readPDF(filePath);
-    //console.log('PDF Content:', pdfContent);
+    console.log('PDF Content:', pdfContent);
 
     // Step 2: Generate questions and answers based on the PDF content
-    const generatedText = await openAIHandler.generateQuestionsAndAnswers(pdfContent);
-    //console.log('Generated Questions and Answers:', generatedText);
+    const generatedText = await aiService.generateQuestionsFromPDFContent(pdfContent);
+    console.log('Generated Questions and Answers:', generatedText);
 
-    // Step 3: Determine the next file number
-    const resultDir = './results';
-    if (!fs.existsSync(resultDir)) {
-      fs.mkdirSync(resultDir);
-    }
-    
-    // Filter the result files to find the next number
-    const files = fs.readdirSync(resultDir);
-    const resultNumber = files.filter(file => file.startsWith('result_')).length + 1;
-    const resultFilePath = path.join(resultDir, `result_${resultNumber}.txt`);
-
-    // Step 4: Write the generated text to the new file
-    fs.writeFileSync(resultFilePath, generatedText, 'utf8');
-    console.log(`Output written to ${resultFilePath}`);
+    // Step 3: Save the generated text to a file
+    saveGeneratedText(generatedText);
 
   } catch (error) {
     console.error('Error:', error);
   }
+}
+
+function saveGeneratedText(text: string) {
+  const resultDir = './results';
+  if (!fs.existsSync(resultDir)) {
+    fs.mkdirSync(resultDir);
+  }
+
+  const files = fs.readdirSync(resultDir);
+  const resultNumber = files.filter(file => file.startsWith('result_')).length + 1;
+  const resultFilePath = path.join(resultDir, `result_${resultNumber}.txt`);
+
+  fs.writeFileSync(resultFilePath, text, 'utf8');
+  console.log(`Output written to ${resultFilePath}`);
 }
 
 main();

@@ -1,28 +1,38 @@
+// src/OpenAIHandler.ts
 import OpenAI from 'openai';
 
 export class OpenAIHandler {
   private openai: OpenAI;
 
   constructor(apiKey: string) {
-    this.openai = new OpenAI({ apiKey });
+    this.openai = new OpenAI({
+      apiKey: apiKey,
+    });
   }
 
   async generateQuestionsAndAnswers(pdfContent: string): Promise<string> {
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4o-mini-2024-07-18', // Make sure to use the correct model name like 'gpt-4o-mini-2024-07-18'
-      messages: [
-        { role: 'system', content: 'You read through entire pdf files and create five short questions and two open-ended questions with answers from it. Answers need to be at least 8 minutes long to answer.' },
-        { role: 'user', content: `Here is the content of the PDF: ${pdfContent}` }
-      ],
-      max_tokens: 2048, // Adjust as needed
-    });
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+          { role: 'system', content: 'You are a knowledgeable assistant. Please generate questions and answers based on the content provided.' },
+          { role: 'user', content: pdfContent }
+        ],
+      });
 
-    if (response.choices && response.choices.length > 0) {
-      const message = response.choices[0].message;
-      if (message && message.content) {
-        return message.content.trim();
+      if (response.choices && response.choices.length > 0) {
+        return response.choices[0].message?.content || 'No content generated';
+      } else {
+        return 'No valid response from OpenAI';
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        // Handle error as an instance of Error
+        throw new Error(`Error calling OpenAI API: ${error.message}`);
+      } else {
+        // Handle other types of errors if necessary
+        throw new Error('An unknown error occurred');
       }
     }
-    throw new Error('No valid response from OpenAI');
   }
 }
