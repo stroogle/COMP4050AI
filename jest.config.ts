@@ -1,7 +1,7 @@
-import type {Config} from 'jest';
+import type { Config } from '@jest/types';
 
-const config: Config = {
-    "testMatch": ["<rootDir>/src/**/*.test.ts"]
+const config: Config.InitialOptions = {
+    testMatch: ["<rootDir>/src/**/*.test.ts"],
 };
 
 export default config;
