@@ -1,36 +1,36 @@
 {
-        "name": "comp4050ai",
-        "version": "1.0.0",
-        "description": "AI Service for COMP4050",
-        "main": "index.js",
-        "scripts": {
-            "test": "jest --setupFiles dotenv/config",
-            "dev": "nodemon src/index.ts"
-        },
-        "keywords": [],
-        "author": "",
-        "license": "ISC",
-        "dependencies": {
-            "class-validator": "^0.14.1",
-            "dotenv": "^16.4.5",
-            "express": "^4.19.2",
-            "glob": "^11.0.0",
-            "node-notifier": "^10.0.1",
-            "openai": "^4.55.7",
-            "pdf-parse": "^1.1.1",
-            "request": "^2.88.2",
-            "tough-cookie": "^4.1.4"
-        },
-        "devDependencies": {
-            "@babel/preset-env": "^7.25.3",
-            "@babel/preset-typescript": "^7.24.7",
-            "@types/express": "^4.17.21",
-            "@types/jest": "^29.5.12",
-            "@types/node": "^22.3.0",
-            "jest": "^29.7.0",
-            "nodemon": "^3.1.4",
-            "ts-node": "^10.9.2",
-            "typescript": "^5.5.4"
-        }
+    "name": "comp4050ai",
+    "version": "1.0.0",
+    "description": "AI Service for COMP4050",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest --setupFiles dotenv/config",
+        "dev": "nodemon src/index.ts",
+        "build": "tsc --declaration --project tsconfig.build.json"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "class-validator": "^0.14.1",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "glob": "^11.0.0",
+        "node-notifier": "^10.0.1",
+        "openai": "^4.55.7",
+        "pdf-parse": "^1.1.1",
+        "request": "^2.88.2",
+        "tough-cookie": "^4.1.4"
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.25.3",
+        "@babel/preset-typescript": "^7.24.7",
+        "@types/express": "^4.17.21",
+        "@types/jest": "^29.5.12",
+        "@types/node": "^22.3.0",
+        "jest": "^29.7.0",
+        "nodemon": "^3.1.4",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.5.4"
     }
-    
+}

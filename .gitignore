@@ -1,3 +1,7 @@
+PDFfiles/
+results/
+QuestionsJSON/
+
 # Logs
 logs
 *.log
