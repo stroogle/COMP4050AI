@@ -2,7 +2,8 @@
     "name": "comp4050ai",
     "version": "1.0.0",
     "description": "AI Service for COMP4050",
-    "main": "index.js",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "test": "jest --setupFiles dotenv/config",
         "dev": "nodemon src/index.ts",
