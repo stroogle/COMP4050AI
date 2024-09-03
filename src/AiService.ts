@@ -1,9 +1,13 @@
 export interface AiService {
     generateQuestions(pdf_name: string): Promise<string>;
-    getQuestions(questions_file: string): Promise<Array<Question>>;
+    getQuestions(questions_file: string): Promise<JSONcontent>;
 }
 
-export interface Question {
-    question_id: number;
+export interface QuestionAnswer {
     question: string;
+    answer: string;
+}
+
+export interface JSONcontent {
+    content: Array<QuestionAnswer>
 }

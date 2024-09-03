@@ -1,5 +1,5 @@
 import { Path } from "glob";
-import { AiService, Question } from "./AiService";
+import { AiService, JSONcontent, QuestionAnswer } from "./AiService";
 
 
 export class SarapeAi implements AiService{
@@ -22,7 +22,7 @@ export class SarapeAi implements AiService{
         throw new Error("Method not implemented.");
     }
 
-    getQuestions(questions_file: string): Promise<Array<Question>> {
+    getQuestions(questions_file: string): Promise<JSONcontent> {
         throw new Error("Method not implemented.");
     }
 

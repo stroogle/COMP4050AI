@@ -18,7 +18,7 @@ describe("First test", () => {
 
     test("Read Questions", async () => {
         const questions = await ai.getQuestions(question_doc);
-        expect(questions.length).toBe(4);
+        expect(questions.content.length).toBe(4);
         console.log(questions);
     })
 })
