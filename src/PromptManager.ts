@@ -1,31 +1,34 @@
+// src/PromptManager.ts
+
 export class PromptManager {
   private numberOfQuestions: number;
   private questionFormat: string;
   private answerFormat: string;
-  private previousQuestions: string[];
+  private previousQuestionsAndAnswers: { question: string; answer: string }[];
 
   constructor(numberOfQuestions: number, questionFormat: string, answerFormat: string) {
     this.numberOfQuestions = numberOfQuestions;
     this.questionFormat = questionFormat;
     this.answerFormat = answerFormat;
-    this.previousQuestions = []; // Initialize with an empty array
+    this.previousQuestionsAndAnswers = [];
   }
 
-  setPreviousQuestions(previousQuestions: string[]) {
-    this.previousQuestions = previousQuestions;
+  setPreviousQuestionsAndAnswers(previousQA: { question: string; answer: string }[]) {
+    this.previousQuestionsAndAnswers = previousQA;
   }
 
   generatePrompt(content: string): string {
-    const randomIntro = this.getRandomIntro();
-    const previousQuestionsString = this.previousQuestions.length
-      ? `Do not generate any questions similar to these: \n${this.previousQuestions.join("\n")}\n`
+    const previousQuestionsAndAnswersString = this.previousQuestionsAndAnswers.length
+      ? `Please avoid generating questions or answers similar to the following questions and answers:\n` +
+        this.previousQuestionsAndAnswers
+          .map((qa, index) => `${index + 1}. Question: ${qa.question} - Answer: ${qa.answer}`)
+          .join("\n") +
+        '\n'
       : '';
 
     return `
-      ${randomIntro}
-      
       Based on the following content, generate ${this.numberOfQuestions} new questions and their corresponding answers.
-      ${previousQuestionsString}
+      ${previousQuestionsAndAnswersString}
       
       Content:
       ${content}
@@ -36,14 +39,5 @@ export class PromptManager {
       Format the answers like this:
       ${this.answerFormat}
     `;
-  }
-
-  private getRandomIntro(): string {
-    const intros = [
-      "Imagine you're a teacher preparing new questions to test a student's deep understanding of the material.",
-      "You are an examiner creating new questions for a retest to ensure comprehension.",
-      "You are designing new questions based on this content to ensure variety and depth.",
-    ];
-    return intros[Math.floor(Math.random() * intros.length)];
   }
 }

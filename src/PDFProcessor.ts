@@ -16,80 +16,55 @@ export class PDFProcessor {
   }
 
   async processPDF(pdfPath: string, regenerate: boolean = false): Promise<void> {
-    const dataBuffer = fs.readFileSync(pdfPath);
-    const pdfData = await pdfParse(dataBuffer);
-    const pdfText = pdfData.text;
-
-    // Check if a previous result exists
-    const previousQuestions = this.loadPreviousQuestions(pdfPath);
-    
-    // If regenerating or no previous questions exist, generate new questions
-    if (!previousQuestions.length || regenerate) {
-      this.promptManager.setPreviousQuestions(previousQuestions);
-      const questionsAndAnswers = await this.generateQuestionsAndAnswers(pdfText);
-
-      const pdfDir = path.dirname(pdfPath);
-      const parentDir = path.resolve(pdfDir, '..');
-      const resultsDir = path.join(parentDir, 'results');
-
-      if (!fs.existsSync(resultsDir)) {
-        fs.mkdirSync(resultsDir);
+    try {
+      // Ensure the file exists
+      if (!fs.existsSync(pdfPath)) {
+        throw new Error(`PDF file not found: ${pdfPath}`);
       }
 
-      const pdfBaseName = path.basename(pdfPath, path.extname(pdfPath));
+      // Read the PDF content
+      const dataBuffer = fs.readFileSync(pdfPath);
+      const pdfData = await pdfParse(dataBuffer);
+      const pdfText = pdfData.text;
 
-      const resultFileName = this.generateUniqueFileName(resultsDir, pdfBaseName);
+      // Load previously generated questions and answers
+      const previousQuestionsAndAnswers = this.loadPreviousQuestionsAndAnswers(pdfPath);
 
-      const resultFilePath = path.join(resultsDir, resultFileName);
-      fs.writeFileSync(resultFilePath, JSON.stringify({ content: questionsAndAnswers }, null, 2));
-      console.log(`Results saved to ${resultFilePath}`);
-    } else {
-      console.log('Previous questions found, regenerating new questions that are not similar.');
-      this.promptManager.setPreviousQuestions(previousQuestions);
-      const questionsAndAnswers = await this.generateQuestionsAndAnswers(pdfText);
-      
-      const pdfDir = path.dirname(pdfPath);
-      const parentDir = path.resolve(pdfDir, '..');
-      const resultsDir = path.join(parentDir, 'results');
+      // Pass previous questions and answers to the prompt manager
+      this.promptManager.setPreviousQuestionsAndAnswers(previousQuestionsAndAnswers);
 
-      const pdfBaseName = path.basename(pdfPath, path.extname(pdfPath));
-      const resultFileName = this.generateUniqueFileName(resultsDir, pdfBaseName);
+      // Generate new questions and answers
+      const newQuestionsAndAnswers = await this.generateQuestionsAndAnswers(pdfText);
 
-      const resultFilePath = path.join(resultsDir, resultFileName);
-      fs.writeFileSync(resultFilePath, JSON.stringify({ content: questionsAndAnswers }, null, 2));
-      console.log(`New questions saved to ${resultFilePath}`);
+      // Validate new questions with OpenAI
+      const validatedQA = await this.validateQuestionsWithOpenAI(newQuestionsAndAnswers, previousQuestionsAndAnswers);
+
+      // Check if any valid, unique questions remain
+      if (validatedQA.length > 0) {
+        // Append or update the result file with the validated content
+        this.appendToResults(pdfPath, validatedQA);
+      } else {
+        console.log("No new unique questions confirmed by OpenAI.");
+      }
+    } catch (error) {
+      console.error('Error processing PDF:', error);
     }
   }
 
-  private loadPreviousQuestions(pdfPath: string): string[] {
-    const pdfDir = path.dirname(pdfPath);
-    const parentDir = path.resolve(pdfDir, '..');
-    const resultsDir = path.join(parentDir, 'results');
-    const pdfBaseName = path.basename(pdfPath, path.extname(pdfPath));
+  private loadPreviousQuestionsAndAnswers(pdfPath: string): { question: string; answer: string }[] {
+    const resultsFilePath = this.getResultsFilePath(pdfPath);
+    const previousQA: { question: string; answer: string }[] = [];
 
-    // Check if any previous results exist
-    let counter = 0;
-    const previousQuestions: string[] = [];
+    if (fs.existsSync(resultsFilePath)) {
+      const fileContent = fs.readFileSync(resultsFilePath, 'utf-8');
+      const jsonContent = JSON.parse(fileContent);
 
-    while (true) {
-      const resultFileName = counter === 0 ? `${pdfBaseName}.json` : `${pdfBaseName}_${counter}.json`;
-      const resultFilePath = path.join(resultsDir, resultFileName);
-
-      if (fs.existsSync(resultFilePath)) {
-        const fileContent = fs.readFileSync(resultFilePath, 'utf-8');
-        const jsonContent = JSON.parse(fileContent);
-        if (jsonContent.content) {
-          for (const qa of jsonContent.content) {
-            previousQuestions.push(qa.question);
-          }
-        }
-        counter += 1;
-      } else {
-        break;
+      if (jsonContent.content) {
+        previousQA.push(...jsonContent.content);
       }
     }
 
-    return previousQuestions;
+    return previousQA;
   }
 
   private async generateQuestionsAndAnswers(content: string): Promise<{ question: string; answer: string }[]> {
@@ -129,15 +104,72 @@ export class PDFProcessor {
     return qaPairs;
   }
 
-  private generateUniqueFileName(dir: string, baseName: string): string {
-    let counter = 0;
-    let fileName = `${baseName}.json`;
+  private async validateQuestionsWithOpenAI(
+    newQA: { question: string; answer: string }[],
+    previousQA: { question: string; answer: string }[]
+  ): Promise<{ question: string; answer: string }[]> {
+    const validatedQA: { question: string; answer: string }[] = [];
 
-    while (fs.existsSync(path.join(dir, fileName))) {
-      counter += 1;
-      fileName = `${baseName}_${counter}.json`;
+    for (const newItem of newQA) {
+      const validationPrompt = `
+        Here are some previously generated questions and answers:
+        ${previousQA.map(qa => `- ${qa.question} - ${qa.answer}`).join("\n")}
+
+        Is the following question similar to any of the previous ones? If it's not similar, say "Unique", otherwise say "Similar":
+
+        Question: ${newItem.question}
+        Answer: ${newItem.answer}
+      `;
+
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini-2024-07-18',
+        messages: [
+          {
+            role: 'user',
+            content: validationPrompt,
+          },
+        ],
+      });
+
+      const validationMessage = response.choices[0].message?.content || '';
+
+      if (validationMessage.trim().toLowerCase().includes("unique")) {
+        validatedQA.push(newItem);
+      }
     }
 
-    return fileName;
+    return validatedQA;
+  }
+
+  private appendToResults(pdfPath: string, newQuestionsAndAnswers: { question: string; answer: string }[]): void {
+    const resultsFilePath = this.getResultsFilePath(pdfPath);
+    let existingContent: { content: { question: string; answer: string }[] } = { content: [] };
+
+    // If the file exists, load the existing content
+    if (fs.existsSync(resultsFilePath)) {
+      const fileContent = fs.readFileSync(resultsFilePath, 'utf-8');
+      existingContent = JSON.parse(fileContent);
+    }
+
+    // Append new questions and answers to the existing content
+    existingContent.content.push(...newQuestionsAndAnswers);
+
+    // Write the updated content back to the same file
+    fs.writeFileSync(resultsFilePath, JSON.stringify(existingContent, null, 2));
+    console.log(`Results updated and saved to ${resultsFilePath}`);
+  }
+
+  private getResultsFilePath(pdfPath: string): string {
+    const pdfDir = path.dirname(pdfPath);
+    const parentDir = path.resolve(pdfDir, '..');
+    const resultsDir = path.join(parentDir, 'results');
+
+    // Ensure the results directory exists
+    if (!fs.existsSync(resultsDir)) {
+      fs.mkdirSync(resultsDir);
+    }
+
+    const pdfBaseName = path.basename(pdfPath, path.extname(pdfPath));
+    return path.join(resultsDir, `${pdfBaseName}.json`);
   }
 }
