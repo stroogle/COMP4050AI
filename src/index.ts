@@ -1,0 +1,1 @@
+export { PDFProcessor } from './PDFProcessor';
