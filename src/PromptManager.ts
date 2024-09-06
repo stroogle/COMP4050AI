@@ -1,5 +1,3 @@
-// src/PromptManager.ts
-
 export class PromptManager {
   private numberOfQuestions: number;
   private questionFormat: string;
