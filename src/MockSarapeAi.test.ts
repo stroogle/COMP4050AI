@@ -22,14 +22,13 @@ describe("First test", () => {
     })
 
     test("Generate N questions", async () => {
-        let questions = await ai.generateNQuestions("sample.pdf", 6);
-
+        let questions = await ai.generateNQuestionsAndAnswers("sample.pdf", 6);
         expect(questions.length).toBe(6);
 
-        questions = await ai.generateNQuestions("sample.pdf", 3);
+        questions = await ai.generateNQuestionsAndAnswers("sample.pdf", 3);
         expect(questions.length).toBe(3);
 
-        questions = await ai.generateNQuestions("sample.pdf", -8);
+        questions = await ai.generateNQuestionsAndAnswers("sample.pdf", -8);
         expect(questions.length).toBe(0);
 
     })
