@@ -18,12 +18,27 @@ export class MockSarapeAi implements AiService {
         this.api_key = api_key;
     }
     
-    generateNQuestionsAndAnswers(pdf_name: string, number_of_questions: number): Promise<QuestionAnswer[]> {
-        throw new Error("Method not implemented.");
+    async generateNQuestionsAndAnswers(pdf_name: string, number_of_questions: number): Promise<QuestionAnswer[]> {
+    
+        let questions_and_answers: QuestionAnswer[] = [];
+
+        for(let i = 0; i < number_of_questions; i++)
+            questions_and_answers.push({
+                answer: "example answer",
+                question: "Lorem ipsum odor amet, consectetuer adipiscing elit. Aptent ullamcorper ultrices mi platea nostra efficitur viverra. Sollicitudin imperdiet mollis maecenas fusce facilisi inceptos penatibus ultricies. Duis eleifend mollis mauris ligula risus tellus litora tortor. Elementum lobortis neque tristique hendrerit et interdum. Sociosqu facilisis sem curabitur scelerisque nullam amet sapien lobortis. Tempus eros ornare ante ligula per; sollicitudin bibendum dapibus."
+            });
+
+        return questions_and_answers;
+
     }
 
-    saveQuestionsAndAnswers(content: QuestionAnswer[], file_name: string): Promise<string> {
-        throw new Error("Method not implemented.");
+    async saveQuestionsAndAnswers(content: QuestionAnswer[], file_name: string): Promise<string> {
+
+        await fs.writeFile(path.join(this.question_dir, file_name), JSON.stringify({
+            content
+        }));
+
+        return file_name;
     }
 
     async generateQuestions(pdf_name: string): Promise<string> {
