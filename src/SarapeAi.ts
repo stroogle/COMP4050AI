@@ -17,6 +17,9 @@ export class SarapeAi implements AiService{
         this.question_dir = question_dir;
         this.api_key = api_key;
     }
+    generateNQuestions(pdf_name: string, number_of_questions: number): Promise<QuestionAnswer[]> {
+        throw new Error("Method not implemented.");
+    }
     
     generateQuestions(pdf_name: string): Promise<string> {
         throw new Error("Method not implemented.");

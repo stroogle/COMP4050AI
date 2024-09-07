@@ -19,6 +19,18 @@ describe("First test", () => {
     test("Read Questions", async () => {
         const questions = await ai.getQuestions(question_doc);
         expect(questions.content.length).toBe(4);
-        console.log(questions);
+    })
+
+    test("Generate N questions", async () => {
+        let questions = await ai.generateNQuestions("sample.pdf", 6);
+
+        expect(questions.length).toBe(6);
+
+        questions = await ai.generateNQuestions("sample.pdf", 3);
+        expect(questions.length).toBe(3);
+
+        questions = await ai.generateNQuestions("sample.pdf", -8);
+        expect(questions.length).toBe(0);
+
     })
 })
