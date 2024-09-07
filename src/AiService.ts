@@ -1,6 +1,6 @@
 export interface AiService {
     generateQuestions(pdf_name: string): Promise<string>;
-    generateNQuestions(pdf_name: string, number_of_questions: number): Promise<QuestionAnswer[]>
+    generateNQuestions(pdf_name: string, number_of_questions: number): Promise<string>
     getQuestions(questions_file: string): Promise<JSONcontent>;
 }
 
