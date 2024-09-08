@@ -22,4 +22,16 @@ describe("Sarape AI tests", () => {
         expect(res.content.length).toBe(3);
     })
 
+    test("Saving content", async() => {
+        let res = await ai.saveQuestionsAndAnswers([], "writeAnswer.json");
+
+        expect(res).toBe("writeAnswer.json");
+    })
+
+    test("Generate N Questions", async () => {
+        let res = await ai.generateNQuestionsAndAnswers("sample.pdf", 4);
+
+        expect(res.length).toBe(4);
+    })
+
 })
