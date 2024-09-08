@@ -1,6 +1,11 @@
 # COMP4050AI
 AI Service for COMP4050
 
+# Install & Update
+As this library is not on the npm registry, any updates and installations need to be performed with the below command.
+
+`npm install git+https://github.com/stroogle/COMP4050AI.git`
+
 # Notes
 There are two implementations of team Sarape's AI. There is a mock implementation for the backend team to use during development and a production implementation we continue to work on. Both implement the same interface. Please ensure `IS_MOCK` is set to `YES` during development.
 ```
@@ -33,7 +38,7 @@ export interface JSONcontent {
 }
 ```
 
-#### generateQuestions
+#### generateQuestions - DEPRECATED
 ```typescript
 // Example Usage
 // ... ai inistialised above
@@ -41,7 +46,7 @@ export interface JSONcontent {
 try {
     /*
     * generateQuestions returns a Promise<string> which represents the name given to the resulting file.
-    * It is recommended to use it with await so that it unqraps the Promise for you.
+    * It is recommended to use it with await so that it unwraps the Promise for you.
     */
     let answer_doc_name: string = await ai.generateQuestions("pdf_name.pdf");
 } catch (e) {
@@ -62,5 +67,37 @@ try {
     let answers: JSONcontent = await ai.getQuestions(answer_doc_name);
 } catch (e) {
     throw new Error("Couldn't get questions");
+}
+```
+
+#### generateNQuestionsAndAnswers
+```typescript
+// Example Usage
+// ... ai initialised above
+
+try {
+    /*
+    * getQuestionsgenerateNQuestionsAndAnswers returns a Promise<QuestionAnswer[]>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let q_and_a = await ai.generateNQuestionsAndAnswers("sample.pdf", 6)
+} catch(e) {
+    throw new Error("Failed to generate questions.")
+}
+
+```
+
+#### saveQuestionsAndAnswers
+```typescript
+// Example Usage
+// ... ai & q_and_a initialised above
+try {
+    /*
+    * saveQuestionsAndAnswers returns a Promise<string>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let q_and_a = await ai.saveQuestionsAndAnswers(q_and_a, "example.json")
+} catch(e) {
+    throw new Error("Failed to generate questions.")
 }
 ```
