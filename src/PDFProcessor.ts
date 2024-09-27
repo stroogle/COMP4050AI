@@ -3,20 +3,23 @@ import path from 'path';
 import pdfParse from 'pdf-parse';
 import axios from 'axios'; // Using Axios for API requests
 import { PromptManager } from './PromptManager';
+import { RubricGenerator } from './RubricGenerator';
 
 export class PDFProcessor {
   private apiKey: string;
   private promptManager: PromptManager;
+  private rubricGenerator: RubricGenerator;
   private model: string;
 
-  constructor(apiKey: string, promptManager: PromptManager, model: string) {
+  constructor(apiKey: string, promptManager: PromptManager, rubricGenerator: RubricGenerator, model: string) {
     this.apiKey = apiKey;
     this.promptManager = promptManager;
+    this.rubricGenerator = rubricGenerator;
     this.model = model; // Store the OpenAI model name
   }
 
-  // Modify processPDF to return the new questions and answers
-  async processPDF(pdfPath: string, tempDir: string, regenerate: boolean = false): Promise<{ question: string; answer: string }[] | null> {
+  // Modify processPDF to return new questions, answers, and rubrics
+  async processPDF(pdfPath: string, tempDir: string, regenerate: boolean = false): Promise<{ questions: { question: string; answer: string }[] | null, rubric: string | null }> {
     try {
       // Ensure the file exists
       if (!fs.existsSync(pdfPath)) {
@@ -44,16 +47,17 @@ export class PDFProcessor {
       if (validatedQA.length > 0) {
         // Append or update the result file with the validated content
         this.appendToTemp(pdfPath, tempDir, validatedQA);
-
-        // Return the newly generated questions and answers
-        return validatedQA;
       } else {
         console.log("No new unique questions confirmed by OpenAI.");
-        return null;
       }
+
+      // Generate rubric based on content
+      const rubric = await this.generateRubric(pdfText);
+
+      return { questions: validatedQA.length > 0 ? validatedQA : null, rubric };
     } catch (error) {
       console.error('Error processing PDF:', error);
-      return null;
+      return { questions: null, rubric: null };
     }
   }
 
@@ -106,6 +110,39 @@ export class PDFProcessor {
       }
     } catch (error) {
       throw new Error(`Error generating questions and answers: ${error}`);
+    }
+  }
+
+  private async generateRubric(content: string): Promise<string | null> {
+    try {
+      const rubricPrompt = this.rubricGenerator.generateRubricPrompt(content);
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: this.model,
+          messages: [
+            {
+              role: 'user',
+              content: rubricPrompt,
+            },
+          ],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.data.choices && response.data.choices.length > 0) {
+        return response.data.choices[0].message?.content || null;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error generating rubric: ${error}`);
+      return null;
     }
   }
 
