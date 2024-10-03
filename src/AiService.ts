@@ -24,6 +24,21 @@ export interface AiService {
      * @returns The name of the file the content was saved to.
      */
     saveQuestionsAndAnswers(content: QuestionAnswer[], file_name: string): Promise<string>;
+    /**
+     * This regenerates a specific question from the answer file, using the pdf file for context. It considers the
+     * other questions that were asked, so that it doesn't regenerate something similar.
+     * @param pdf_name - The name of the pdf file used for the question context.
+     * @param q_and_a_file - The q_and_a result file previously generated.
+     * @param regenerate_index - The index of the question that you would like regenerated.
+     */
+    regenerateQuestion(pdf_name: string, q_and_a_file: string, regenerate_index: number): Promise<QuestionAnswer[]>;
+    /**
+     * Using a pdf_name to find the context, and the name of it's resulting questions, this function returns an array
+     * of Rubtic objects the length of the number of questions in q_and_a file. Rubric[i] should correspond with q_and_a[i].question
+     * @param pdf_name - The file name of the pdf file used for context.
+     * @param q_and_a_file - the q_and_a result file name containing the previously generated questions and results.
+     */
+    createRubric(pdf_name: string, q_and_a_file: string): Promise<Rubric[]>;
 }
 
 export interface QuestionAnswer {
@@ -33,4 +48,12 @@ export interface QuestionAnswer {
 
 export interface JSONcontent {
     content: Array<QuestionAnswer>
+}
+
+export interface Rubric {
+    fail: string;
+    pass: string;
+    credit: string;
+    distinction: string;
+    high_distinction: string;
 }

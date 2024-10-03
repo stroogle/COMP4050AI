@@ -1,5 +1,5 @@
 import * as path from "path"
-import { AiService, JSONcontent, QuestionAnswer } from "./AiService";
+import { AiService, JSONcontent, QuestionAnswer, Rubric } from "./AiService";
 import fs from "fs/promises";
 
 export class MockSarapeAi implements AiService {
@@ -16,6 +16,14 @@ export class MockSarapeAi implements AiService {
         this.pdf_dir = pdf_dir;
         this.question_dir = question_dir;
         this.api_key = api_key;
+    }
+
+    regenerateQuestion(pdf_name: string, q_and_a_file: string, regenerate_index: number): Promise<QuestionAnswer[]> {
+        throw new Error("Method not implemented.");
+    }
+    
+    createRubric(pdf_name: string, q_and_a_file: string): Promise<Rubric[]> {
+        throw new Error("Method not implemented.");
     }
     
     async generateNQuestionsAndAnswers(pdf_name: string, number_of_questions: number): Promise<QuestionAnswer[]> {
