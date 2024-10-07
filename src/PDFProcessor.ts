@@ -1,66 +1,81 @@
 import fs from 'fs';
 import path from 'path';
 import pdfParse from 'pdf-parse';
-import axios from 'axios'; // Using Axios for API requests
-import { PromptManager } from './PromptManager';
+import { OpenAI } from 'openai';
+import { QuestionAnswerGenerator } from './QuestionAnswerGenerator';
 import { RubricGenerator } from './RubricGenerator';
+import { FeedbackGenerator } from './FeedbackGenerator';
 
 export class PDFProcessor {
-  private apiKey: string;
-  private promptManager: PromptManager;
+  private openai: OpenAI;
+  private questionAnswerGenerator: QuestionAnswerGenerator;
   private rubricGenerator: RubricGenerator;
+  private feedbackGenerator: FeedbackGenerator;
   private model: string;
 
-  constructor(apiKey: string, promptManager: PromptManager, rubricGenerator: RubricGenerator, model: string) {
-    this.apiKey = apiKey;
-    this.promptManager = promptManager;
+  constructor(apiKey: string, questionAnswerGenerator: QuestionAnswerGenerator, rubricGenerator: RubricGenerator, model: string) {
+    this.openai = new OpenAI({ apiKey });
+    this.questionAnswerGenerator = questionAnswerGenerator;
     this.rubricGenerator = rubricGenerator;
-    this.model = model; // Store the OpenAI model name
+    this.feedbackGenerator = new FeedbackGenerator(rubricGenerator);
+    this.model = model;
   }
 
-  // Modify processPDF to return new questions, answers, and rubrics
-  async processPDF(pdfPath: string, tempDir: string, regenerate: boolean = false): Promise<{ questions: { question: string; answer: string }[] | null, rubric: string | null }> {
-    try {
-      // Ensure the file exists
-      if (!fs.existsSync(pdfPath)) {
-        throw new Error(`PDF file not found: ${pdfPath}`);
-      }
-
-      // Read the PDF content
-      const dataBuffer = fs.readFileSync(pdfPath);
-      const pdfData = await pdfParse(dataBuffer);
-      const pdfText = pdfData.text;
-
-      // Load previously generated questions and answers
-      const previousQuestionsAndAnswers = this.loadPreviousQuestionsAndAnswers(pdfPath, tempDir);
-
-      // Pass previous questions and answers to the prompt manager
-      this.promptManager.setPreviousQuestionsAndAnswers(previousQuestionsAndAnswers);
-
-      // Generate new questions and answers
-      const newQuestionsAndAnswers = await this.generateQuestionsAndAnswers(pdfText);
-
-      // Validate new questions with OpenAI
-      const validatedQA = await this.validateQuestionsWithOpenAI(newQuestionsAndAnswers, previousQuestionsAndAnswers);
-
-      // Check if any valid, unique questions remain
-      if (validatedQA.length > 0) {
-        // Append or update the result file with the validated content
-        this.appendToTemp(pdfPath, tempDir, validatedQA);
-      } else {
-        console.log("No new unique questions confirmed by OpenAI.");
-      }
-
-      // Generate rubric based on content
-      const rubric = await this.generateRubric(pdfText);
-
-      return { questions: validatedQA.length > 0 ? validatedQA : null, rubric };
-    } catch (error) {
-      console.error('Error processing PDF:', error);
-      return { questions: null, rubric: null };
+  // Process PDF and extract content
+  async processPDF(pdfPath: string): Promise<string> {
+    if (!fs.existsSync(pdfPath)) {
+      throw new Error(`PDF file not found: ${pdfPath}`);
     }
+
+    const dataBuffer = fs.readFileSync(pdfPath);
+    const pdfData = await pdfParse(dataBuffer);
+    const pdfText = pdfData.text;
+
+    if (!pdfText || pdfText.trim() === "") {
+      throw new Error("The PDF content is empty or unreadable.");
+    }
+
+    console.log('PDF Content:', pdfText);
+    return pdfText;
   }
 
+  // Generate Questions and Answers, checking for duplicates and uniqueness
+  async generateQuestionsAndAnswers(content: string, tempDir: string, pdfPath: string): Promise<{ question: string; answer: string }[]> {
+    const previousQuestionsAndAnswers = this.loadPreviousQuestionsAndAnswers(pdfPath, tempDir);
+    this.questionAnswerGenerator.setPreviousQuestionsAndAnswers(previousQuestionsAndAnswers);
+
+    const prompt = this.questionAnswerGenerator.generateQuestionPrompt(content);
+
+    const response = await this.openai.chat.completions.create({
+      model: this.model,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    });
+
+    if (response.choices && response.choices.length > 0) {
+      const generatedText = response.choices[0].message?.content || '';
+      const newQuestionsAndAnswers = this.parseQuestionsAndAnswers(generatedText);
+
+      // Check for duplicates and validate
+      const validatedQuestions = await this.validateQuestionsWithOpenAI(newQuestionsAndAnswers, previousQuestionsAndAnswers);
+
+      if (validatedQuestions.length === 0) {
+        throw new Error('No new unique questions were generated.');
+      }
+
+      // Save new unique questions to temp file
+      this.appendToTemp(pdfPath, tempDir, validatedQuestions);
+      return validatedQuestions;
+    }
+
+    throw new Error('No new questions were generated.');
+  }
+
+  // Load previously generated questions from the temp file
   private loadPreviousQuestionsAndAnswers(pdfPath: string, tempDir: string): { question: string; answer: string }[] {
     const tempFilePath = this.getTempFilePath(pdfPath, tempDir);
     const previousQA: { question: string; answer: string }[] = [];
@@ -77,87 +92,7 @@ export class PDFProcessor {
     return previousQA;
   }
 
-  private async generateQuestionsAndAnswers(content: string): Promise<{ question: string; answer: string }[]> {
-    try {
-      const prompt = this.promptManager.generatePrompt(content);
-
-      // Using Axios to call OpenAI's API
-      const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          model: this.model, // Use the model set in the constructor
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.data.choices && response.data.choices.length > 0) {
-        const generatedText = response.data.choices[0].message?.content || '';
-        const qaPairs = this.parseQuestionsAndAnswers(generatedText);
-        return qaPairs;
-      } else {
-        return [];
-      }
-    } catch (error) {
-      throw new Error(`Error generating questions and answers: ${error}`);
-    }
-  }
-
-  private async generateRubric(content: string): Promise<string | null> {
-    try {
-      const rubricPrompt = this.rubricGenerator.generateRubricPrompt(content);
-      const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          model: this.model,
-          messages: [
-            {
-              role: 'user',
-              content: rubricPrompt,
-            },
-          ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.data.choices && response.data.choices.length > 0) {
-        return response.data.choices[0].message?.content || null;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.error(`Error generating rubric: ${error}`);
-      return null;
-    }
-  }
-
-  private parseQuestionsAndAnswers(text: string): { question: string; answer: string }[] {
-    const qaPairs: { question: string; answer: string }[] = [];
-    const lines = text.split('\n').filter(line => line.trim() !== '');
-    for (let i = 0; i < lines.length; i += 2) {
-      const question = lines[i].replace('Question:', '').trim();
-      const answer = lines[i + 1]?.replace('Answer:', '').trim() || '';
-      qaPairs.push({ question, answer });
-    }
-
-    return qaPairs;
-  }
-
+  // Validate new questions with OpenAI to ensure uniqueness
   private async validateQuestionsWithOpenAI(
     newQA: { question: string; answer: string }[],
     previousQA: { question: string; answer: string }[]
@@ -175,26 +110,17 @@ export class PDFProcessor {
         Answer: ${newItem.answer}
       `;
 
-      const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          model: this.model, // Same model for validation
-          messages: [
-            {
-              role: 'user',
-              content: validationPrompt,
-            },
-          ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
+      const response = await this.openai.chat.completions.create({
+        model: this.model,
+        messages: [
+          {
+            role: 'user',
+            content: validationPrompt,
           },
-        }
-      );
+        ],
+      });
 
-      const validationMessage = response.data.choices[0].message?.content || '';
+      const validationMessage = response.choices[0].message?.content || '';
 
       if (validationMessage.trim().toLowerCase().includes("unique")) {
         validatedQA.push(newItem);
@@ -204,31 +130,75 @@ export class PDFProcessor {
     return validatedQA;
   }
 
+  // Generate Rubric based on the content
+  async generateRubric(content: string): Promise<string> {
+    const prompt = this.rubricGenerator.generateRubricPrompt(content);
+    
+    const response = await this.openai.chat.completions.create({
+      model: this.model,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    if (response.choices && response.choices.length > 0) {
+      return response.choices[0].message?.content || '';
+    }
+
+    return '';
+  }
+
+  // Generate feedback based on rubric and content
+  async generateFeedback(content: string, rubric: string): Promise<string | null> {
+    const prompt = this.feedbackGenerator.generateFeedbackPrompt(content);
+    
+    const response = await this.openai.chat.completions.create({
+      model: this.model,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    if (response.choices && response.choices.length > 0) {
+      return response.choices[0].message?.content || null;
+    }
+
+    return null;
+  }
+
+  // Helper function to save validated questions to temp file
   private appendToTemp(pdfPath: string, tempDir: string, newQuestionsAndAnswers: { question: string; answer: string }[]): void {
     const tempFilePath = this.getTempFilePath(pdfPath, tempDir);
     let existingContent: { content: { question: string; answer: string }[] } = { content: [] };
 
-    // If the file exists, load the existing content
     if (fs.existsSync(tempFilePath)) {
       const fileContent = fs.readFileSync(tempFilePath, 'utf-8');
       existingContent = JSON.parse(fileContent);
     }
 
-    // Append new questions and answers to the existing content
     existingContent.content.push(...newQuestionsAndAnswers);
 
-    // Write the updated content back to the same file
     fs.writeFileSync(tempFilePath, JSON.stringify(existingContent, null, 2));
     console.log(`Temp updated and saved to ${tempFilePath}`);
   }
 
   private getTempFilePath(pdfPath: string, tempDir: string): string {
-    // Ensure the temp directory exists
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir);
     }
 
     const pdfBaseName = path.basename(pdfPath, path.extname(pdfPath));
     return path.join(tempDir, `${pdfBaseName}.json`);
+  }
+
+  // Helper function to parse questions and answers, removing numbering
+  private parseQuestionsAndAnswers(text: string): { question: string; answer: string }[] {
+    const qaPairs: { question: string; answer: string }[] = [];
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+
+    for (let i = 0; i < lines.length; i += 2) {
+      // Remove numbering (like "1.", "2.") from the question
+      const question = lines[i].replace(/^\d+\.\s*/, '').replace('Question:', '').trim();
+      const answer = lines[i + 1]?.replace('Answer:', '').trim() || '';
+      qaPairs.push({ question, answer });
+    }
+
+    return qaPairs;
   }
 }

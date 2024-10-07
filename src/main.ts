@@ -1,5 +1,5 @@
 import { PDFProcessor } from './PDFProcessor';
-import { PromptManager } from './PromptManager';
+import { QuestionAnswerGenerator } from './QuestionAnswerGenerator';
 import { RubricGenerator } from './RubricGenerator';
 import * as dotenv from 'dotenv';
 import path from 'path';
@@ -8,58 +8,53 @@ import path from 'path';
 dotenv.config();
 
 async function main() {
-  // Set the path to your PDF file (replace with the actual file path)
   const pdfPath = './PDFfiles/437598.pdf';
-  
-  // Set the temp directory (replace with the actual directory path)
   const tempDir = path.resolve(__dirname, '../temp');
-
-  // Set the number of questions, question format, and answer format
-  const numberOfQuestions = 5; // You can modify this value as needed
+  const numberOfQuestions = 5;
   const questionFormat = "Question: [Provide the format for questions]";
   const answerFormat = "Answer: [Provide the format for answers]";
-
-  // Set the OpenAI model (replace with your desired model)
   const openAIModel = 'gpt-4o-mini-2024-07-18';
 
-  // Create an instance of PromptManager with the number of questions, question format, and answer format
-  const promptManager = new PromptManager(numberOfQuestions, questionFormat, answerFormat);
-
-  // Define custom rubrics directly in main
+  const questionAnswerGenerator = new QuestionAnswerGenerator(numberOfQuestions, questionFormat, answerFormat);
   const customRubrics = [
     { category: "Clarity", description: "Evaluate the clarity of the content." },
     { category: "Completeness", description: "Evaluate how complete the response is." },
     { category: "Accuracy", description: "Evaluate the accuracy of the provided information." },
-    { category: "Engagement", description: "Evaluate how engaging the content is." }, // Example additional rubric
+    { category: "Engagement", description: "Evaluate how engaging the content is." },
   ];
+  const rubricGenerator = new RubricGenerator(customRubrics);
 
-  // Set the number of criteria and format for the rubric
-  const numberOfCriteria = customRubrics.length; // Set this based on the number of custom rubrics
-  const criteriaFormat = "Criteria: [Provide the format for the criteria]";
+  const pdfProcessor = new PDFProcessor(process.env.OPENAI_API_KEY || '', questionAnswerGenerator, rubricGenerator, openAIModel);
 
-  // Create an instance of RubricGenerator with the custom rubrics
-  const rubricGenerator = new RubricGenerator(numberOfCriteria, criteriaFormat, customRubrics);
+  try {
+    const pdfContent = await pdfProcessor.processPDF(pdfPath);
 
-  // Create an instance of PDFProcessor, passing the OpenAI API key, PromptManager, RubricGenerator, and the model
-  const pdfProcessor = new PDFProcessor(process.env.OPENAI_API_KEY || '', promptManager, rubricGenerator, openAIModel);
+    // Generate Questions and Answers
+    try {
+      const questionsAndAnswers = await pdfProcessor.generateQuestionsAndAnswers(pdfContent, tempDir, pdfPath);
+      console.log('Generated Questions and Answers:', questionsAndAnswers);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error generating new questions:', error.message);
+      } else {
+        console.error('Unknown error occurred while generating questions.');
+      }
+    }
 
-  // Process the PDF, and specify the temp directory for saving the results
-  const result = await pdfProcessor.processPDF(pdfPath, tempDir, false);
+    // Generate Rubric
+    const rubric = await pdfProcessor.generateRubric(pdfContent);
+    console.log('Generated Rubric:', rubric);
 
-  // Output the new questions and answers to the console
-  if (result.questions) {
-    console.log('New Questions and Answers:');
-    console.log(JSON.stringify(result.questions, null, 2));
-  } else {
-    console.log('No new questions were generated.');
-  }
+    // Generate Feedback
+    const feedback = await pdfProcessor.generateFeedback(pdfContent, rubric);
+    console.log('Generated Feedback:', feedback);
 
-  // Output the rubric evaluation to the console
-  if (result.rubric) {
-    console.log('Rubric Evaluation:');
-    console.log(result.rubric);
-  } else {
-    console.log('No rubric evaluation was generated.');
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("An error occurred during processing:", error.message);
+    } else {
+      console.error("Unknown error occurred during processing.");
+    }
   }
 }
 
