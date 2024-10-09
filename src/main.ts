@@ -8,7 +8,7 @@ import path from 'path';
 dotenv.config();
 
 async function main() {
-  const pdfPath = './PDFfiles/437598.pdf';
+  const pdfPath = './PDFfiles/437598.pdf';  // You can change this to any file path.
   const tempDir = path.resolve(__dirname, '../temp');
   const numberOfQuestions = 5;
   const questionFormat = "Question: [Provide the format for questions]";
@@ -16,14 +16,11 @@ async function main() {
   const openAIModel = 'gpt-4o-mini-2024-07-18';
 
   const questionAnswerGenerator = new QuestionAnswerGenerator(numberOfQuestions, questionFormat, answerFormat);
-  const customRubrics = [
-    { category: "Clarity", description: "Evaluate the clarity of the content." },
-    { category: "Completeness", description: "Evaluate how complete the response is." },
-    { category: "Accuracy", description: "Evaluate the accuracy of the provided information." },
-    { category: "Engagement", description: "Evaluate how engaging the content is." },
-  ];
-  const rubricGenerator = new RubricGenerator(customRubrics);
 
+  // Initialize RubricGenerator without custom rubrics
+  const rubricGenerator = new RubricGenerator(process.env.OPENAI_API_KEY || '');
+
+  // Initialize PDFProcessor with required arguments
   const pdfProcessor = new PDFProcessor(process.env.OPENAI_API_KEY || '', questionAnswerGenerator, rubricGenerator, openAIModel);
 
   try {
@@ -41,8 +38,8 @@ async function main() {
       }
     }
 
-    // Generate Rubric
-    const rubric = await pdfProcessor.generateRubric(pdfContent);
+    // Generate Rubric from content analyzed by OpenAI
+    const rubric = await rubricGenerator.generateRubricFromContent(pdfContent);
     console.log('Generated Rubric:', rubric);
 
     // Generate Feedback

@@ -17,7 +17,9 @@ export class PDFProcessor {
     this.openai = new OpenAI({ apiKey });
     this.questionAnswerGenerator = questionAnswerGenerator;
     this.rubricGenerator = rubricGenerator;
-    this.feedbackGenerator = new FeedbackGenerator(rubricGenerator);
+
+    // Pass OpenAI instance to FeedbackGenerator
+    this.feedbackGenerator = new FeedbackGenerator(this.openai);
     this.model = model;
   }
 
@@ -44,35 +46,49 @@ export class PDFProcessor {
     const previousQuestionsAndAnswers = this.loadPreviousQuestionsAndAnswers(pdfPath, tempDir);
     this.questionAnswerGenerator.setPreviousQuestionsAndAnswers(previousQuestionsAndAnswers);
 
-    const prompt = this.questionAnswerGenerator.generateQuestionPrompt(content);
+    const maxAttempts = 10; // Max attempts to generate unique questions
+    let attempts = 0;
+    let generatedQuestionsAndAnswers: { question: string; answer: string }[] = [];
 
-    const response = await this.openai.chat.completions.create({
-      model: this.model,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    // Generate questions and ensure no duplicates
+    while (generatedQuestionsAndAnswers.length < this.questionAnswerGenerator.getNumberOfQuestions() && attempts < maxAttempts) {
+      attempts++;
+      const prompt = this.questionAnswerGenerator.generateQuestionPrompt(content);
 
-    if (response.choices && response.choices.length > 0) {
-      const generatedText = response.choices[0].message?.content || '';
-      const newQuestionsAndAnswers = this.parseQuestionsAndAnswers(generatedText);
+      const response = await this.openai.chat.completions.create({
+        model: this.model,
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+      });
 
-      // Check for duplicates and validate
-      const validatedQuestions = await this.validateQuestionsWithOpenAI(newQuestionsAndAnswers, previousQuestionsAndAnswers);
+      if (response.choices && response.choices.length > 0) {
+        const generatedText = response.choices[0].message?.content || '';
+        const newQuestionsAndAnswers = this.parseQuestionsAndAnswers(generatedText);
 
-      if (validatedQuestions.length === 0) {
-        throw new Error('No new unique questions were generated.');
+        // Validate new questions
+        const validatedQuestions = await this.validateQuestionsWithOpenAI(newQuestionsAndAnswers, previousQuestionsAndAnswers);
+
+        if (validatedQuestions.length > 0) {
+          generatedQuestionsAndAnswers.push(...validatedQuestions);
+        }
       }
 
-      // Save new unique questions to temp file
-      this.appendToTemp(pdfPath, tempDir, validatedQuestions);
-      return validatedQuestions;
+      if (attempts >= maxAttempts) {
+        throw new Error('No new unique questions could be generated.');
+      }
     }
 
-    throw new Error('No new questions were generated.');
+    if (generatedQuestionsAndAnswers.length === 0) {
+      throw new Error('No new questions were generated.');
+    }
+
+    // Save new unique questions to temp file
+    this.appendToTemp(pdfPath, tempDir, generatedQuestionsAndAnswers);
+    return generatedQuestionsAndAnswers;
   }
 
   // Load previously generated questions from the temp file
@@ -132,11 +148,11 @@ export class PDFProcessor {
 
   // Generate Rubric based on the content
   async generateRubric(content: string): Promise<string> {
-    const prompt = this.rubricGenerator.generateRubricPrompt(content);
+    const rubric = await this.rubricGenerator.generateRubricFromContent(content);
     
     const response = await this.openai.chat.completions.create({
       model: this.model,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: rubric }],
     });
 
     if (response.choices && response.choices.length > 0) {
@@ -148,11 +164,11 @@ export class PDFProcessor {
 
   // Generate feedback based on rubric and content
   async generateFeedback(content: string, rubric: string): Promise<string | null> {
-    const prompt = this.feedbackGenerator.generateFeedbackPrompt(content);
-    
+    const feedback = await this.feedbackGenerator.generateFeedback(content, rubric);
+
     const response = await this.openai.chat.completions.create({
       model: this.model,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: feedback }],
     });
 
     if (response.choices && response.choices.length > 0) {

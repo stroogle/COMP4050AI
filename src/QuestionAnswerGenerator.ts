@@ -11,6 +11,11 @@ export class QuestionAnswerGenerator {
     this.previousQuestionsAndAnswers = [];
   }
 
+  // Getter for numberOfQuestions
+  public getNumberOfQuestions(): number {
+    return this.numberOfQuestions;
+  }
+
   // Set previously generated questions and answers to avoid duplicates
   setPreviousQuestionsAndAnswers(previousQA: { question: string; answer: string }[]) {
     this.previousQuestionsAndAnswers = previousQA;
