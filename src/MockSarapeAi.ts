@@ -18,6 +18,14 @@ export class MockSarapeAi implements AiService {
         this.api_key = api_key;
     }
 
+    summarizeSubmission(pdf_name: string): Promise<string> {
+        throw new Error("Method not implemented.");
+    }
+
+    autoMark(pdf_name: string, q_and_a: QuestionAnswer[], answers: string[]): Promise<number[]> {
+        throw new Error("Method not implemented.");
+    }
+
     regenerateQuestion(pdf_name: string, q_and_a_file: string, regenerate_index: number): Promise<QuestionAnswer[]> {
         throw new Error("Method not implemented.");
     }

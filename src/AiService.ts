@@ -39,6 +39,21 @@ export interface AiService {
      * @param q_and_a_file - the q_and_a result file name containing the previously generated questions and results.
      */
     createRubric(pdf_name: string, q_and_a_file: string): Promise<Rubric[]>;
+
+    /**
+     * Creates a summary of the document provided
+     * @param pdf_name 
+     */
+    summarizeSubmission(pdf_name: string): Promise<string>;
+
+    /**
+     * @precondition q_and_a.length == answers.length
+     * @precondition answers[i] corresponds to the question at q_and_a[i]
+     * @param pdf_name - Name of the PDF file for context.
+     * @param q_and_a - The questions that are set for the user.
+     * @param answers - The user's answers
+     */
+    autoMark(pdf_name: string, q_and_a: QuestionAnswer[], answers: string[]): Promise<Mark[]>;
 }
 
 export interface QuestionAnswer {
@@ -57,3 +72,5 @@ export interface Rubric {
     distinction: string;
     high_distinction: string;
 }
+
+type Mark = number;

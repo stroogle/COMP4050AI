@@ -101,3 +101,63 @@ try {
     throw new Error("Failed to generate questions.")
 }
 ```
+
+#### regenerateQuestion
+```typescript
+// Example Usage
+// ... ai & q_and_a initialised above
+try {
+    /*
+    * saveQuestionsAndAnswers returns a Promise<string>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let q_and_a = await ai.saveQuestionsAndAnswers(q_and_a, "example.json")
+} catch(e) {
+    throw new Error("Failed to generate questions.")
+}
+```
+
+#### createRubric
+```typescript
+// Example Usage
+// ... ai & q_and_a initialised above
+try {
+    /*
+    * saveQuestionsAndAnswers returns a Promise<string>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let q_and_a = await ai.saveQuestionsAndAnswers(q_and_a, "example.json")
+} catch(e) {
+    throw new Error("Failed to generate questions.")
+}
+```
+
+#### summarizeSubmission
+```typescript
+// Example Usage
+// ... ai & q_and_a initialised above
+try {
+    /*
+    * saveQuestionsAndAnswers returns a Promise<string>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let q_and_a = await ai.saveQuestionsAndAnswers(q_and_a, "example.json")
+} catch(e) {
+    throw new Error("Failed to generate questions.")
+}
+```
+
+#### autoMark
+```typescript
+// Example Usage
+// ... ai & q_and_a initialised above
+try {
+    /*
+    * saveQuestionsAndAnswers returns a Promise<string>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let q_and_a = await ai.saveQuestionsAndAnswers(q_and_a, "example.json")
+} catch(e) {
+    throw new Error("Failed to generate questions.")
+}
+```
