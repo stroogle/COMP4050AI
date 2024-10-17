@@ -36,6 +36,15 @@ export interface QuestionAnswer {
 export interface JSONcontent {
     content: Array<QuestionAnswer>
 }
+
+export interface Rubric {
+    fail: string;
+    pass: string;
+    credit: string;
+    distinction: string;
+    high_distinction: string;
+    criteria: string;
+}
 ```
 
 #### generateQuestions - DEPRECATED
@@ -99,5 +108,70 @@ try {
     let q_and_a = await ai.saveQuestionsAndAnswers(q_and_a, "example.json")
 } catch(e) {
     throw new Error("Failed to generate questions.")
+}
+```
+
+#### regenerateNQuestions
+```typescript
+// Example Usage
+// ... ai & q_and_a initialised above
+try {
+    /*
+    * regenerateNQuestions returns a Promise<QuestionAnswer[]>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let new_questions = await ai.regenerateNQuestions("sample.pdf", 5, q_and_a);
+} catch(e) {
+    throw new Error("Failed to re-generate questions.")
+}
+```
+
+#### createRubric
+```typescript
+// Example Usage
+// ... ai & q_and_a initialised above
+try {
+    /*
+    * createRubric returns a Promise<Rubric[]>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let rubric = await ai.createRubric(
+        "overviwe of project",
+        ["Criteria #1", ["Criteria #2"]],
+        ["strong", "ai", "functional", "agile"],
+        ["Compotent engineer", "Good planning"]
+    );
+} catch(e) {
+    throw new Error("Failed to generate rubric.")
+}
+```
+
+#### summarizeSubmission
+```typescript
+// Example Usage
+// ... ai & q_and_a initialised above
+try {
+    /*
+    * summarizeSubmission returns a Promise<string>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let summary = await ai.summarizeSubmission("sample.pdf")
+} catch(e) {
+    throw new Error("Failed to generate questions.")
+}
+```
+
+#### generateFeedback
+```typescript
+// Example Usage
+// ... ai & q_and_a initialised above
+try {
+    /*
+    * generateFeedback returns a Promise<string>.
+    * It is recommened to use it with await, so that it unwraps the Promise for you.
+    */
+    let feedback = await ai.generateFeedback("sample.pdf", rubric);
+} catch(e) {
+    throw new Error("Failed to generate feedback.")
 }
 ```

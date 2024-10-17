@@ -1,6 +1,6 @@
 import fs from "fs/promises"
 import * as path from "path";
-import { AiService, JSONcontent, QuestionAnswer } from "./AiService";
+import { AiService, JSONcontent, QuestionAnswer, Rubric } from "./AiService";
 import z, { ZodError } from "zod";
 import OpenAI from "openai";
 import { PDFReader } from "./PDFReader";
@@ -22,6 +22,26 @@ export class SarapeAi implements AiService{
         this.client = new OpenAI({
             apiKey: api_key
         })
+    }
+
+    regenerateNQuestions(pdf_name: string, number_of_questions: number, question_context: QuestionAnswer[]): Promise<QuestionAnswer[]> {
+        throw new Error("Method not implemented.");
+    }
+
+    createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]> {
+        throw new Error("Method not implemented.");
+    }
+
+    generateFeedback(pdf_name: string, rubric: Rubric[]): Promise<string> {
+        throw new Error("Method not implemented.");
+    }
+
+    summarizeSubmission(pdf_name: string): Promise<string> {
+        throw new Error("Method not implemented.");
+    }
+
+    autoMark(pdf_name: string, q_and_a: QuestionAnswer[], answers: string[]): Promise<number[]> {
+        throw new Error("Method not implemented.");
     }
 
     async generateNQuestionsAndAnswers(pdf_name: string, number_of_questions: number): Promise<QuestionAnswer[]> {
