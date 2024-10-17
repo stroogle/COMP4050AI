@@ -24,19 +24,23 @@ export class SarapeAi implements AiService{
         })
     }
 
+    regenerateNQuestions(pdf_name: string, number_of_questions: number, question_context: QuestionAnswer[]): Promise<QuestionAnswer[]> {
+        throw new Error("Method not implemented.");
+    }
+
+    createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]> {
+        throw new Error("Method not implemented.");
+    }
+
+    generateFeedback(pdf_name: string, rubric: Rubric[]): Promise<string> {
+        throw new Error("Method not implemented.");
+    }
+
     summarizeSubmission(pdf_name: string): Promise<string> {
         throw new Error("Method not implemented.");
     }
 
     autoMark(pdf_name: string, q_and_a: QuestionAnswer[], answers: string[]): Promise<number[]> {
-        throw new Error("Method not implemented.");
-    }
-    
-    regenerateQuestion(pdf_name: string, q_and_a_file: string, regenerate_index: number): Promise<QuestionAnswer[]> {
-        throw new Error("Method not implemented.");
-    }
-
-    createRubric(pdf_name: string, q_and_a_file: string): Promise<Rubric[]> {
         throw new Error("Method not implemented.");
     }
 

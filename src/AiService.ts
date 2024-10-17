@@ -27,33 +27,32 @@ export interface AiService {
     /**
      * This regenerates a specific question from the answer file, using the pdf file for context. It considers the
      * other questions that were asked, so that it doesn't regenerate something similar.
+     * @precondition - regenerate_index is a valid index.
      * @param pdf_name - The name of the pdf file used for the question context.
-     * @param q_and_a_file - The q_and_a result file previously generated.
-     * @param regenerate_index - The index of the question that you would like regenerated.
+     * @param question_context - These give a clue to the ai as to which questions to avoid asking.
      */
-    regenerateQuestion(pdf_name: string, q_and_a_file: string, regenerate_index: number): Promise<QuestionAnswer[]>;
+    regenerateNQuestions(pdf_name: string, number_of_questions: number, question_context: QuestionAnswer[]): Promise<QuestionAnswer[]>;
     /**
      * Using a pdf_name to find the context, and the name of it's resulting questions, this function returns an array
-     * of Rubtic objects the length of the number of questions in q_and_a file. Rubric[i] should correspond with q_and_a[i].question
-     * @param pdf_name - The file name of the pdf file used for context.
-     * @param q_and_a_file - the q_and_a result file name containing the previously generated questions and results.
+     * of Rubtic objects.
+     * @param project_pdf - The name of the pdf containing the instructions for the porject.
+     * @param unit_guide_pdf - The name of the pdf holding the unit_guide.
      */
-    createRubric(pdf_name: string, q_and_a_file: string): Promise<Rubric[]>;
+    createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]>;
 
     /**
      * Creates a summary of the document provided
-     * @param pdf_name 
+     * @param pdf_name - The name of the pdf containing the students submission.
      */
     summarizeSubmission(pdf_name: string): Promise<string>;
 
     /**
-     * @precondition q_and_a.length == answers.length
-     * @precondition answers[i] corresponds to the question at q_and_a[i]
-     * @param pdf_name - Name of the PDF file for context.
-     * @param q_and_a - The questions that are set for the user.
-     * @param answers - The user's answers
+     * Creates feedback for the submission based on the rubric. Not marked.
+     * @param pdf_name  - Name of the pdf file containing the student submission.
+     * @param rubric - The marking rubric to base the feedback on.
      */
-    autoMark(pdf_name: string, q_and_a: QuestionAnswer[], answers: string[]): Promise<Mark[]>;
+    generateFeedback(pdf_name: string, rubric: Rubric[]): Promise<string>;
+    
 }
 
 export interface QuestionAnswer {
@@ -71,6 +70,5 @@ export interface Rubric {
     credit: string;
     distinction: string;
     high_distinction: string;
+    criteria: string;
 }
-
-type Mark = number;
