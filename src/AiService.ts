@@ -29,6 +29,7 @@ export interface AiService {
      * other questions that were asked, so that it doesn't regenerate something similar.
      * @precondition - regenerate_index is a valid index.
      * @param pdf_name - The name of the pdf file used for the question context.
+     * @param number_of_questions - the number of questions to generate
      * @param question_context - These give a clue to the ai as to which questions to avoid asking.
      */
     regenerateNQuestions(pdf_name: string, number_of_questions: number, question_context: QuestionAnswer[]): Promise<QuestionAnswer[]>;
