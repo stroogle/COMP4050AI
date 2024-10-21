@@ -24,6 +24,33 @@ export interface AiService {
      * @returns The name of the file the content was saved to.
      */
     saveQuestionsAndAnswers(content: QuestionAnswer[], file_name: string): Promise<string>;
+    /**
+     * This regenerates a specific question from the answer file, using the pdf file for context. It considers the
+     * other questions that were asked, so that it doesn't regenerate something similar.
+     * @precondition - regenerate_index is a valid index.
+     * @param pdf_name - The name of the pdf file used for the question context.
+     * @param number_of_questions - the number of questions to generate
+     * @param question_context - These give a clue to the ai as to which questions to avoid asking.
+     */
+    regenerateNQuestions(pdf_name: string, number_of_questions: number, question_context: QuestionAnswer[]): Promise<QuestionAnswer[]>;
+    /**
+     * Using a pdf_name to find the context, and the name of it's resulting questions, this function returns an array
+     * of Rubtic objects.
+     * @param project_pdf - The name of the pdf containing the instructions for the porject.
+     * @param unit_guide_pdf - The name of the pdf holding the unit_guide.
+     */
+    createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]>;
+    /**
+     * Creates a summary of the document provided
+     * @param pdf_name - The name of the pdf containing the students submission.
+     */
+    summarizeSubmission(pdf_name: string): Promise<string>;
+    /**
+     * Creates feedback for the submission based on the rubric. Not marked.
+     * @param pdf_name  - Name of the pdf file containing the student submission.
+     * @param rubric - The marking rubric to base the feedback on.
+     */
+    generateFeedback(pdf_name: string, rubric: Rubric[]): Promise<string>;
 }
 export interface QuestionAnswer {
     question: string;
@@ -31,4 +58,12 @@ export interface QuestionAnswer {
 }
 export interface JSONcontent {
     content: Array<QuestionAnswer>;
+}
+export interface Rubric {
+    fail: string;
+    pass: string;
+    credit: string;
+    distinction: string;
+    high_distinction: string;
+    criteria: string;
 }

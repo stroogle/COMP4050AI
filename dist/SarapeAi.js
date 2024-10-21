@@ -49,6 +49,21 @@ class SarapeAi {
             apiKey: api_key
         });
     }
+    regenerateNQuestions(pdf_name, number_of_questions, question_context) {
+        throw new Error("Method not implemented.");
+    }
+    createRubric(overview, criteria, keywords, unit_outcomes) {
+        throw new Error("Method not implemented.");
+    }
+    generateFeedback(pdf_name, rubric) {
+        throw new Error("Method not implemented.");
+    }
+    summarizeSubmission(pdf_name) {
+        throw new Error("Method not implemented.");
+    }
+    autoMark(pdf_name, q_and_a, answers) {
+        throw new Error("Method not implemented.");
+    }
     generateNQuestionsAndAnswers(pdf_name, number_of_questions) {
         return __awaiter(this, void 0, void 0, function* () {
             let pdf_content = yield (new PDFReader_1.PDFReader()).readPDF(path.join(this.pdf_dir, pdf_name));
