@@ -137,7 +137,7 @@ try {
     */
     let rubric = await ai.createRubric(
         "overviwe of project",
-        ["Criteria #1", ["Criteria #2"]],
+        ["Criteria #1", "Criteria #2"],
         ["strong", "ai", "functional", "agile"],
         ["Compotent engineer", "Good planning"]
     );
