@@ -44,6 +44,52 @@ class MockSarapeAi {
         this.question_dir = question_dir;
         this.api_key = api_key;
     }
+    regenerateNQuestions(pdf_name, number_of_questions, question_context) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let new_questions = yield this.generateNQuestionsAndAnswers(pdf_name, number_of_questions);
+                for (let i = 0; i < number_of_questions; i++) {
+                    new_questions[i].question += Math.random();
+                }
+                return new_questions;
+            }
+            catch (error) {
+                throw new Error("Failed to regenerate question.");
+            }
+        });
+    }
+    createRubric(overview, criteria, keywords, unit_outcomes) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // const q_and_a = await this.getQuestions(q_and_a_file);
+                let rubric = [];
+                for (let i = 0; i < criteria.length; i++) {
+                    rubric.push({
+                        fail: "Lorem ipsum odor amet, consectetuer adipiscing elit. Hendrerit mattis et hac in pretium maecenas!",
+                        pass: "Lorem ipsum odor amet, consectetuer adipiscing elit. Hendrerit mattis et hac in pretium maecenas!",
+                        credit: "Lorem ipsum odor amet, consectetuer adipiscing elit. Hendrerit mattis et hac in pretium maecenas!",
+                        distinction: "Lorem ipsum odor amet, consectetuer adipiscing elit. Hendrerit mattis et hac in pretium maecenas!",
+                        high_distinction: "Lorem ipsum odor amet, consectetuer adipiscing elit. Hendrerit mattis et hac in pretium maecenas!",
+                        criteria: `Critera #${i}`
+                    });
+                }
+                return rubric;
+            }
+            catch (error) {
+                throw new Error("Failed to create rubric.");
+            }
+        });
+    }
+    generateFeedback(pdf_name, rubric) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti ornare lectus dolor pulvinar dictum. Praesent faucibus placerat habitasse hac taciti sagittis quisque fusce. Ex suscipit neque parturient aenean pharetra per faucibus conubia libero. Mi vitae felis maecenas fames nostra placerat consequat. Donec magna sit ipsum parturient aptent dictum venenatis. Semper mollis taciti lobortis; pharetra at luctus malesuada.\n\nInterdum imperdiet condimentum penatibus dapibus sociosqu semper tellus est. Nascetur iaculis nec finibus himenaeos tempor; potenti in. Accumsan primis ornare aliquam rutrum, molestie aliquam. Facilisis taciti taciti libero rutrum non pellentesque dapibus nisl. Natoque posuere neque et, himenaeos scelerisque sollicitudin. Enim feugiat purus vulputate ipsum massa nec. Turpis metus ac sapien lacus ac suspendisse tempus.";
+        });
+    }
+    summarizeSubmission(pdf_name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+        });
+    }
     generateNQuestionsAndAnswers(pdf_name, number_of_questions) {
         return __awaiter(this, void 0, void 0, function* () {
             let questions_and_answers = [];
