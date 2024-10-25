@@ -14,31 +14,30 @@ async function testRubricGenerator() {
     // Instantiate the RubricGenerator with the API key
     const rubricGenerator = new RubricGenerator(apiKey);
 
-    // Detailed sample content to generate the rubric from
-    const sampleContent = `
-        
-Week 1	Review of algorithms and related concepts
-Week 2	Algorithm Correctness and Efficiency
-Week 3	Algorithm Design Strategies
-Week 4	Sorting
-Week 5	Binary Trees
-Week 6	Binary Trees (cont.)
-5--18 April	
-Mid semester break
+    // Define the assignment overview, criteria, keywords, and unit outcomes
+    const overview = `This course covers a variety of algorithms and data structures, 
+                      aiming to teach students how to evaluate, design, and implement efficient algorithms.`;
 
-Week 7l	
-Priority Queues, Heaps and Heapsort
+    const criteria = [
+        "Algorithm Understanding",
+        "Efficiency Evaluation",
+        "Design Strategy",
+        "Data Structures",
+        "Graph Proficiency",
+        "Computability Insight"
+    ];
 
-Week 8	Programming with Maps and Hashtables
-Week 9	Graph Algorithms
-Week 10	Graph Algorithms (cont.)
-Week 11	Advanced Trees
-Week 12	An Introduction to Computability
-    `;
+    const keywords = ["Algorithms", "Data Structures", "Graphs", "Efficiency", "Sorting", "Heaps", "Computability"];
+
+    const unitOutcomes = [
+        "Understand the role of algorithms in solving computational problems.",
+        "Be able to design efficient algorithms for various problems.",
+        "Apply data structures in practical programming scenarios."
+    ];
 
     try {
-        // Call the rubric generation method
-        const generatedRubric = await rubricGenerator.generateRubricFromContent(sampleContent);
+        // Call the createRubric method to generate a rubric based on the provided data
+        const generatedRubric = await rubricGenerator.createRubric(overview, criteria, keywords, unitOutcomes);
 
         // Log the result (you can use JSON.stringify for better formatting)
         console.log('Generated Rubric:', JSON.stringify(generatedRubric, null, 2));
