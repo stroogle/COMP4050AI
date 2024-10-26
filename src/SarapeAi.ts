@@ -4,13 +4,14 @@ import { AiService, JSONcontent, QuestionAnswer, Rubric } from "./AiService";
 import z, { ZodError } from "zod";
 import OpenAI from "openai";
 import { PDFReader } from "./PDFReader";
-
+import { RubricGenerator } from "./RubricGenerator";
 
 export class SarapeAi implements AiService{
 
     pdf_dir: string;
     question_dir: string;
     client: OpenAI;
+    rubricGenerator: RubricGenerator;
 
     constructor(
         pdf_dir: string,
@@ -22,16 +23,18 @@ export class SarapeAi implements AiService{
         this.client = new OpenAI({
             apiKey: api_key
         })
+        this.rubricGenerator = new RubricGenerator(api_key);
     }
 
     regenerateNQuestions(pdf_name: string, number_of_questions: number, question_context: QuestionAnswer[]): Promise<QuestionAnswer[]> {
         throw new Error("Method not implemented.");
     }
 
-    createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]> {
-        throw new Error("Method not implemented.");
+    async createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]> {
+        // Call RubricGenerator's createRubric and return the result
+        return await this.rubricGenerator.createRubric(overview, criteria, keywords, unit_outcomes);
     }
-
+    
     generateFeedback(pdf_name: string, rubric: Rubric[]): Promise<string> {
         throw new Error("Method not implemented.");
     }

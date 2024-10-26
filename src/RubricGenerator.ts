@@ -1,18 +1,8 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import { Rubric } from './AiService';
 
-dotenv.config(); // Ensure environment variables are loaded
-
-type Rubric = {
-    name: string;
-    gradeDescriptors: {
-        Fail: string;
-        Pass: string;
-        Credit: string;
-        Distinction: string;
-        HighDistinction: string;
-    };
-};
+dotenv.config(); 
 
 export class RubricGenerator {
     private openai: OpenAI;
@@ -49,23 +39,21 @@ export class RubricGenerator {
             prompt += `Unit Learning Outcomes:\n- ${unit_outcomes.join("\n- ")}\n\n`;
         }
 
-        prompt += `Please structure the output as a JSON object with the following format:\n\n{
-          "criteria": [
+        prompt += `Please structure the output as a JSON array with objects structured like:
+        
+        [
             {
-              "name": "<Criterion Name>",
-              "gradeDescriptors": {
-                "Fail": "<Detailed description for Fail>",
-                "Pass": "<Detailed description for Pass>",
-                "Credit": "<Detailed description for Credit>",
-                "Distinction": "<Detailed description for Distinction>",
-                "HighDistinction": "<Detailed description for High Distinction>"
-              }
-            },
-            ...
-          ]
-        }`;
+                "name": "<Criterion Name>",
+                "gradeDescriptors": {
+                    "fail": "<Detailed description for Fail>",
+                    "pass": "<Detailed description for Pass>",
+                    "credit": "<Detailed description for Credit>",
+                    "distinction": "<Detailed description for Distinction>",
+                    "highDistinction": "<Detailed description for High Distinction>"
+                }
+            }
+        ]`;
 
-        // Send the request to OpenAI
         try {
             const response = await this.openai.chat.completions.create({
                 model: "gpt-4o-2024-08-06",
@@ -82,7 +70,18 @@ export class RubricGenerator {
             generatedRubric = generatedRubric.replace(/```json|```/g, '').trim();
 
             // Parse the cleaned-up JSON
-            return JSON.parse(generatedRubric).criteria as Rubric[];
+            const parsedRubric = JSON.parse(generatedRubric).map((item: any) => ({
+                name: item.name,
+                gradeDescriptors: {
+                    fail: item.gradeDescriptors.Fail || item.gradeDescriptors.fail || '',
+                    pass: item.gradeDescriptors.Pass || item.gradeDescriptors.pass || '',
+                    credit: item.gradeDescriptors.Credit || item.gradeDescriptors.credit || '',
+                    distinction: item.gradeDescriptors.Distinction || item.gradeDescriptors.distinction || '',
+                    highDistinction: item.gradeDescriptors.HighDistinction || item.gradeDescriptors.highDistinction || ''
+                }
+            })) as Rubric[];
+
+            return parsedRubric;
         } catch (error) {
             console.error('Error generating rubric:', error);
             throw new Error('Failed to generate rubric.');
