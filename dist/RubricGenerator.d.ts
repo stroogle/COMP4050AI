@@ -1,11 +1,14 @@
+import { Rubric } from './AiService';
 export declare class RubricGenerator {
     private openai;
     constructor(apiKey: string);
     /**
-     * This function sends the content to OpenAI and asks it to generate a rubric with criteria and grade descriptors.
-     * The rubric is returned as a structured JSON object.
-     * @param content - The content from which the rubric is generated.
-     * @returns A JSON object representing the rubric.
+     * Creates a rubric based on the provided overview, criteria, keywords, and unit outcomes.
+     * @param overview - An overview or description of the assignment.
+     * @param criteria - Specific criteria that should be evaluated in the rubric.
+     * @param keywords - Any specific keywords or topics that should be emphasized.
+     * @param unit_outcomes - Learning outcomes that the rubric should map to.
+     * @returns A promise that resolves to a structured list of rubric criteria with grade descriptors.
      */
-    generateRubricFromContent(content: string): Promise<any>;
+    createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]>;
 }

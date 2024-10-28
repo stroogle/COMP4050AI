@@ -41,6 +41,8 @@ const path = __importStar(require("path"));
 const zod_1 = __importStar(require("zod"));
 const openai_1 = __importDefault(require("openai"));
 const PDFReader_1 = require("./PDFReader");
+const RubricGenerator_1 = require("./RubricGenerator");
+const FeedbackGenerator_1 = require("./FeedbackGenerator");
 class SarapeAi {
     constructor(pdf_dir, question_dir, api_key) {
         this.pdf_dir = pdf_dir;
@@ -48,15 +50,22 @@ class SarapeAi {
         this.client = new openai_1.default({
             apiKey: api_key
         });
+        this.rubricGenerator = new RubricGenerator_1.RubricGenerator(api_key);
+        this.feedbackGenerator = new FeedbackGenerator_1.FeedbackGenerator(this.client);
     }
     regenerateNQuestions(pdf_name, number_of_questions, question_context) {
         throw new Error("Method not implemented.");
     }
     createRubric(overview, criteria, keywords, unit_outcomes) {
-        throw new Error("Method not implemented.");
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.rubricGenerator.createRubric(overview, criteria, keywords, unit_outcomes);
+        });
     }
     generateFeedback(pdf_name, rubric) {
-        throw new Error("Method not implemented.");
+        return __awaiter(this, void 0, void 0, function* () {
+            // 
+            throw new Error("Method not implemented.");
+        });
     }
     summarizeSubmission(pdf_name) {
         throw new Error("Method not implemented.");
