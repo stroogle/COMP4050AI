@@ -5,6 +5,7 @@ import z, { ZodError } from "zod";
 import OpenAI from "openai";
 import { PDFReader } from "./PDFReader";
 import { RubricGenerator } from "./RubricGenerator";
+import { FeedbackGenerator } from "./FeedbackGenerator";
 
 export class SarapeAi implements AiService{
 
@@ -12,6 +13,7 @@ export class SarapeAi implements AiService{
     question_dir: string;
     client: OpenAI;
     rubricGenerator: RubricGenerator;
+    feedbackGenerator: FeedbackGenerator;
 
     constructor(
         pdf_dir: string,
@@ -24,6 +26,7 @@ export class SarapeAi implements AiService{
             apiKey: api_key
         })
         this.rubricGenerator = new RubricGenerator(api_key);
+        this.feedbackGenerator = new FeedbackGenerator(this.client);
     }
 
     regenerateNQuestions(pdf_name: string, number_of_questions: number, question_context: QuestionAnswer[]): Promise<QuestionAnswer[]> {
@@ -31,11 +34,12 @@ export class SarapeAi implements AiService{
     }
 
     async createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]> {
-        // Call RubricGenerator's createRubric and return the result
+        
         return await this.rubricGenerator.createRubric(overview, criteria, keywords, unit_outcomes);
     }
     
-    generateFeedback(pdf_name: string, rubric: Rubric[]): Promise<string> {
+    async generateFeedback(pdf_name: string, rubric: Rubric[]): Promise<string> {
+        // 
         throw new Error("Method not implemented.");
     }
 
