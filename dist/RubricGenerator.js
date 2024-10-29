@@ -94,11 +94,11 @@ class RubricGenerator {
                 // })) as Rubric[];
                 const parsedRubric = JSON.parse(generatedRubric).map((item) => ({
                     criteria: item.criteria,
-                    fail: item.gradeDescriptors.Fail || item.gradeDescriptors.fail || '',
-                    pass: item.gradeDescriptors.Pass || item.gradeDescriptors.pass || '',
-                    credit: item.gradeDescriptors.Credit || item.gradeDescriptors.credit || '',
-                    distinction: item.gradeDescriptors.Distinction || item.gradeDescriptors.distinction || '',
-                    high_distinction: item.gradeDescriptors.HighDistinction || item.gradeDescriptors.highDistinction || ''
+                    fail: item.fail || '',
+                    pass: item.pass || '',
+                    credit: item.credit || '',
+                    distinction: item.distinction || '',
+                    high_distinction: item.high_distinction || ''
                 }));
                 return parsedRubric;
             }
