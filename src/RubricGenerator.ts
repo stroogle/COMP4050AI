@@ -39,18 +39,31 @@ export class RubricGenerator {
             prompt += `Unit Learning Outcomes:\n- ${unit_outcomes.join("\n- ")}\n\n`;
         }
 
+        // prompt += `Please structure the output as a JSON array with objects structured like:
+        
+        // [
+        //     {
+        //         "name": "<Criterion Name>",
+        //         "gradeDescriptors": {
+        //             "fail": "<Detailed description for Fail>",
+        //             "pass": "<Detailed description for Pass>",
+        //             "credit": "<Detailed description for Credit>",
+        //             "distinction": "<Detailed description for Distinction>",
+        //             "highDistinction": "<Detailed description for High Distinction>"
+        //         }
+        //     }
+        // ]`;
+
         prompt += `Please structure the output as a JSON array with objects structured like:
         
         [
             {
-                "name": "<Criterion Name>",
-                "gradeDescriptors": {
-                    "fail": "<Detailed description for Fail>",
-                    "pass": "<Detailed description for Pass>",
-                    "credit": "<Detailed description for Credit>",
-                    "distinction": "<Detailed description for Distinction>",
-                    "highDistinction": "<Detailed description for High Distinction>"
-                }
+                "criteria": "<Criterion Name>",
+                "fail": "<Detailed description for Fail>",
+                "pass": "<Detailed description for Pass>",
+                "credit": "<Detailed description for Credit>",
+                "distinction": "<Detailed description for Distinction>",
+                "high_distinction": "<Detailed description for High Distinction>"
             }
         ]`;
 
@@ -70,15 +83,23 @@ export class RubricGenerator {
             generatedRubric = generatedRubric.replace(/```json|```/g, '').trim();
 
             // Parse the cleaned-up JSON
-            const parsedRubric = JSON.parse(generatedRubric).map((item: any) => ({
-                name: item.name,
-                gradeDescriptors: {
-                    fail: item.gradeDescriptors.Fail || item.gradeDescriptors.fail || '',
-                    pass: item.gradeDescriptors.Pass || item.gradeDescriptors.pass || '',
-                    credit: item.gradeDescriptors.Credit || item.gradeDescriptors.credit || '',
-                    distinction: item.gradeDescriptors.Distinction || item.gradeDescriptors.distinction || '',
-                    highDistinction: item.gradeDescriptors.HighDistinction || item.gradeDescriptors.highDistinction || ''
-                }
+            // const parsedRubric = JSON.parse(generatedRubric).map((item: any) => ({
+            //     name: item.name,
+            //     gradeDescriptors: {
+            //         fail: item.gradeDescriptors.Fail || item.gradeDescriptors.fail || '',
+            //         pass: item.gradeDescriptors.Pass || item.gradeDescriptors.pass || '',
+            //         credit: item.gradeDescriptors.Credit || item.gradeDescriptors.credit || '',
+            //         distinction: item.gradeDescriptors.Distinction || item.gradeDescriptors.distinction || '',
+            //         highDistinction: item.gradeDescriptors.HighDistinction || item.gradeDescriptors.highDistinction || ''
+            //     }
+            // })) as Rubric[];
+            const parsedRubric: Rubric[] = JSON.parse(generatedRubric).map((item: any) => ({
+                criteria: item.name,
+                fail: item.gradeDescriptors.Fail || item.gradeDescriptors.fail || '',
+                pass: item.gradeDescriptors.Pass || item.gradeDescriptors.pass || '',
+                credit: item.gradeDescriptors.Credit || item.gradeDescriptors.credit || '',
+                distinction: item.gradeDescriptors.Distinction || item.gradeDescriptors.distinction || '',
+                high_distinction: item.gradeDescriptors.HighDistinction || item.gradeDescriptors.highDistinction || ''
             })) as Rubric[];
 
             return parsedRubric;
