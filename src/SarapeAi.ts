@@ -43,8 +43,32 @@ export class SarapeAi implements AiService{
         throw new Error("Method not implemented.");
     }
 
-    summarizeSubmission(pdf_name: string): Promise<string> {
-        throw new Error("Method not implemented.");
+    async summarizeSubmission(pdf_name: string): Promise<string> {
+        let pdf_content = await (new PDFReader()).readPDF(path.join(this.pdf_dir, pdf_name));
+        let prompt: string = `
+            Using the text below, please create a brief summary about the brief. Do not include any additional response text, I only want the summary.
+        `.trim();
+
+        const params: OpenAI.Chat.ChatCompletionCreateParams = {
+            messages: [
+                {
+                    role: 'user',
+                    content: `
+                        ${prompt}
+
+                        ${pdf_content}
+                    `.trim()
+                }
+            ],
+            model: "gpt-3.5-turbo"
+        }
+
+        const completion = await this.client.chat.completions.create(params);
+
+        if(typeof completion.choices[0].message.content != "string")
+            throw new Error("Did not receive a message from OpenAI.")
+
+        return completion.choices[0].message.content;
     }
 
     autoMark(pdf_name: string, q_and_a: QuestionAnswer[], answers: string[]): Promise<number[]> {

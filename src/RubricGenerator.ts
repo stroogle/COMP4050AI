@@ -94,7 +94,7 @@ export class RubricGenerator {
             //     }
             // })) as Rubric[];
             const parsedRubric: Rubric[] = JSON.parse(generatedRubric).map((item: any) => ({
-                criteria: item.name,
+                criteria: item.criteria,
                 fail: item.gradeDescriptors.Fail || item.gradeDescriptors.fail || '',
                 pass: item.gradeDescriptors.Pass || item.gradeDescriptors.pass || '',
                 credit: item.gradeDescriptors.Credit || item.gradeDescriptors.credit || '',
