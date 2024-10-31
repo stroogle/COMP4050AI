@@ -199,5 +199,20 @@ try {
 }
 ```
 
-## Acknowledgements
-[TO BE FILLED IN]
+#### Acknowledgements
+
+##Resources used
+
+https://www.digitalocean.com/community/tutorials/nodejs-jwt-expressjs
+
+https://www.npmjs.com/package/lowdb
+
+https://coding-boot-camp.github.io/full-stack/apis/how-to-use-api-keys
+
+https://jestjs.io/docs/getting-started
+
+##Special thanks to
+
+Ansgar Fehnker, Kate Stefanov, Carl Svensson and Luke for their support and guidance.
+
+The team Mexico for being such an amazing collaborative experience.
