@@ -41,6 +41,8 @@ const path = __importStar(require("path"));
 const zod_1 = __importStar(require("zod"));
 const openai_1 = __importDefault(require("openai"));
 const PDFReader_1 = require("./PDFReader");
+const RubricGenerator_1 = require("./RubricGenerator");
+const FeedbackGenerator_1 = require("./FeedbackGenerator");
 class SarapeAi {
     constructor(pdf_dir, question_dir, api_key) {
         this.pdf_dir = pdf_dir;
@@ -48,18 +50,47 @@ class SarapeAi {
         this.client = new openai_1.default({
             apiKey: api_key
         });
+        this.rubricGenerator = new RubricGenerator_1.RubricGenerator(api_key);
+        this.feedbackGenerator = new FeedbackGenerator_1.FeedbackGenerator(this.client);
     }
     regenerateNQuestions(pdf_name, number_of_questions, question_context) {
         throw new Error("Method not implemented.");
     }
     createRubric(overview, criteria, keywords, unit_outcomes) {
-        throw new Error("Method not implemented.");
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.rubricGenerator.createRubric(overview, criteria, keywords, unit_outcomes);
+        });
     }
     generateFeedback(pdf_name, rubric) {
-        throw new Error("Method not implemented.");
+        return __awaiter(this, void 0, void 0, function* () {
+            // 
+            throw new Error("Method not implemented.");
+        });
     }
     summarizeSubmission(pdf_name) {
-        throw new Error("Method not implemented.");
+        return __awaiter(this, void 0, void 0, function* () {
+            let pdf_content = yield (new PDFReader_1.PDFReader()).readPDF(path.join(this.pdf_dir, pdf_name));
+            let prompt = `
+            Using the text below, please create a brief summary about the brief. Do not include any additional response text, I only want the summary.
+        `.trim();
+            const params = {
+                messages: [
+                    {
+                        role: 'user',
+                        content: `
+                        ${prompt}
+
+                        ${pdf_content}
+                    `.trim()
+                    }
+                ],
+                model: "gpt-3.5-turbo"
+            };
+            const completion = yield this.client.chat.completions.create(params);
+            if (typeof completion.choices[0].message.content != "string")
+                throw new Error("Did not receive a message from OpenAI.");
+            return completion.choices[0].message.content;
+        });
     }
     autoMark(pdf_name, q_and_a, answers) {
         throw new Error("Method not implemented.");

@@ -4,13 +4,16 @@ import { AiService, JSONcontent, QuestionAnswer, Rubric } from "./AiService";
 import z, { ZodError } from "zod";
 import OpenAI from "openai";
 import { PDFReader } from "./PDFReader";
-
+import { RubricGenerator } from "./RubricGenerator";
+import { FeedbackGenerator } from "./FeedbackGenerator";
 
 export class SarapeAi implements AiService{
 
     pdf_dir: string;
     question_dir: string;
     client: OpenAI;
+    rubricGenerator: RubricGenerator;
+    feedbackGenerator: FeedbackGenerator;
 
     constructor(
         pdf_dir: string,
@@ -22,22 +25,50 @@ export class SarapeAi implements AiService{
         this.client = new OpenAI({
             apiKey: api_key
         })
+        this.rubricGenerator = new RubricGenerator(api_key);
+        this.feedbackGenerator = new FeedbackGenerator(this.client);
     }
 
     regenerateNQuestions(pdf_name: string, number_of_questions: number, question_context: QuestionAnswer[]): Promise<QuestionAnswer[]> {
         throw new Error("Method not implemented.");
     }
 
-    createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]> {
+    async createRubric(overview: string, criteria: string[], keywords: string[], unit_outcomes: string[]): Promise<Rubric[]> {
+        
+        return await this.rubricGenerator.createRubric(overview, criteria, keywords, unit_outcomes);
+    }
+    
+    async generateFeedback(pdf_name: string, rubric: Rubric[]): Promise<string> {
+        // 
         throw new Error("Method not implemented.");
     }
 
-    generateFeedback(pdf_name: string, rubric: Rubric[]): Promise<string> {
-        throw new Error("Method not implemented.");
-    }
+    async summarizeSubmission(pdf_name: string): Promise<string> {
+        let pdf_content = await (new PDFReader()).readPDF(path.join(this.pdf_dir, pdf_name));
+        let prompt: string = `
+            Using the text below, please create a brief summary about the brief. Do not include any additional response text, I only want the summary.
+        `.trim();
 
-    summarizeSubmission(pdf_name: string): Promise<string> {
-        throw new Error("Method not implemented.");
+        const params: OpenAI.Chat.ChatCompletionCreateParams = {
+            messages: [
+                {
+                    role: 'user',
+                    content: `
+                        ${prompt}
+
+                        ${pdf_content}
+                    `.trim()
+                }
+            ],
+            model: "gpt-3.5-turbo"
+        }
+
+        const completion = await this.client.chat.completions.create(params);
+
+        if(typeof completion.choices[0].message.content != "string")
+            throw new Error("Did not receive a message from OpenAI.")
+
+        return completion.choices[0].message.content;
     }
 
     autoMark(pdf_name: string, q_and_a: QuestionAnswer[], answers: string[]): Promise<number[]> {
