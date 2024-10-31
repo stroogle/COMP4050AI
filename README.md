@@ -1,13 +1,29 @@
 # COMP4050AI
-AI Service for COMP4050
+This library is intended for use by Team Mexico's backend development team. It is our implementation of the AI to be used for the project. It utilises ChatGPT under the hood.
 
-# Install & Update
-As this library is not on the npm registry, any updates and installations need to be performed with the below command.
+## Third Party Libraries Used
+```json
+"dependencies": {
+    "dotenv": "^16.4.5",
+    "openai": "^4.55.7",
+    "pdf-parse": "^1.1.1",
+    "zod": "^3.23.8"
+}
 
-`npm install git+https://github.com/stroogle/COMP4050AI.git`
+"devDependencies": {
+    "@babel/preset-env": "^7.25.3",
+    "@babel/preset-typescript": "^7.24.7",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.3.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+}
+```
 
-# Notes
-There are two implementations of team Sarape's AI. There is a mock implementation for the backend team to use during development and a production implementation we continue to work on. Both implement the same interface. Please ensure `IS_MOCK` is set to `YES` during development.
+## Mock Environment
+Please ensure the below environment variable is set if you are in development.
 ```
 // .env
 IS_MOCK=YES
@@ -64,6 +80,7 @@ try {
 ```
 
 #### getQuestions
+This function is used to read questions and answers from a JSON document.
 ```typescript
 // Example Usage
 // ... ai & answer_doc_name inisitalised above
@@ -80,6 +97,7 @@ try {
 ```
 
 #### generateNQuestionsAndAnswers
+This function is used to generate a number of questions *n*, which will have attached example answers.
 ```typescript
 // Example Usage
 // ... ai initialised above
@@ -97,6 +115,7 @@ try {
 ```
 
 #### saveQuestionsAndAnswers
+This function is used to save a set of questions and answers to a file.
 ```typescript
 // Example Usage
 // ... ai & q_and_a initialised above
@@ -112,6 +131,7 @@ try {
 ```
 
 #### regenerateNQuestions
+This function regenerates a number of questions *n*. It takes a set of questions and answers to avoid generating the same content.
 ```typescript
 // Example Usage
 // ... ai & q_and_a initialised above
@@ -127,6 +147,7 @@ try {
 ```
 
 #### createRubric
+This function creates a rubric for an assignment from the content received.
 ```typescript
 // Example Usage
 // ... ai & q_and_a initialised above
@@ -147,6 +168,7 @@ try {
 ```
 
 #### summarizeSubmission
+This function creates a short summary of the submission provided.
 ```typescript
 // Example Usage
 // ... ai & q_and_a initialised above
@@ -162,6 +184,7 @@ try {
 ```
 
 #### generateFeedback
+This function creates feedback for the submission provided based on a given rubric.
 ```typescript
 // Example Usage
 // ... ai & q_and_a initialised above
@@ -175,3 +198,21 @@ try {
     throw new Error("Failed to generate feedback.")
 }
 ```
+
+## Acknowledgements
+
+#### Resources used
+
+https://www.digitalocean.com/community/tutorials/nodejs-jwt-expressjs
+
+https://www.npmjs.com/package/lowdb
+
+https://coding-boot-camp.github.io/full-stack/apis/how-to-use-api-keys
+
+https://jestjs.io/docs/getting-started
+
+#### Special thanks to
+
+Ansgar Fehnker, Kate Stefanov, Carl Svensson and Luke for their support and guidance.
+
+The team Mexico for being such an amazing collaborative experience.

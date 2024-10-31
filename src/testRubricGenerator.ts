@@ -1,5 +1,5 @@
 import { RubricGenerator } from './RubricGenerator'; // Adjust path if needed
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 
 dotenv.config(); // Load environment variables from the .env file
 

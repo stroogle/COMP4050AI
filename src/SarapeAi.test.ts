@@ -34,4 +34,33 @@ describe("Sarape AI tests", () => {
         expect(res.length).toBe(4);
     })
 
+    test("Generate Rubric", async () => {
+
+        const overview = `This course covers a variety of algorithms and data structures, 
+        aiming to teach students how to evaluate, design, and implement efficient algorithms.`;
+
+        const criteria = [
+            "Algorithm Understanding",
+            "Efficiency Evaluation",
+            "Design Strategy",
+            "Data Structures",
+            "Graph Proficiency",
+            "Computability Insight"
+        ];
+
+        const keywords = ["Algorithms", "Data Structures", "Graphs", "Efficiency", "Sorting", "Heaps", "Computability"];
+
+        const unitOutcomes = [
+            "Understand the role of algorithms in solving computational problems.",
+            "Be able to design efficient algorithms for various problems.",
+            "Apply data structures in practical programming scenarios."
+        ];
+        console.log(await ai.createRubric(
+            overview,
+            criteria,
+            keywords,
+            unitOutcomes
+        ));
+    }, 50 * 1000)
+
 })
