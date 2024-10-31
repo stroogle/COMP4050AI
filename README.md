@@ -199,9 +199,9 @@ try {
 }
 ```
 
-#### Acknowledgements
+## Acknowledgements
 
-## Resources used
+#### Resources used
 
 https://www.digitalocean.com/community/tutorials/nodejs-jwt-expressjs
 
@@ -211,7 +211,7 @@ https://coding-boot-camp.github.io/full-stack/apis/how-to-use-api-keys
 
 https://jestjs.io/docs/getting-started
 
-## Special thanks to
+#### Special thanks to
 
 Ansgar Fehnker, Kate Stefanov, Carl Svensson and Luke for their support and guidance.
 
