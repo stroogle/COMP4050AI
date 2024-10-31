@@ -13,21 +13,14 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "class-validator": "^0.14.1",
         "dotenv": "^16.4.5",
-        "express": "^4.19.2",
-        "glob": "^11.0.0",
-        "node-notifier": "^10.0.1",
         "openai": "^4.55.7",
         "pdf-parse": "^1.1.1",
-        "request": "^2.88.2",
-        "tough-cookie": "^4.1.4",
         "zod": "^3.23.8"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.25.3",
         "@babel/preset-typescript": "^7.24.7",
-        "@types/express": "^4.17.21",
         "@types/jest": "^29.5.12",
         "@types/node": "^22.3.0",
         "jest": "^29.7.0",
