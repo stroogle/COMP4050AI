@@ -2,7 +2,25 @@
 This library is intended for use by Team Mexico's backend development team. It is our implementation of the AI to be used for the project. It utilises ChatGPT under the hood.
 
 ## Third Party Libraries Used
-[TO BE FILLED IN]
+```json
+"dependencies": {
+    "dotenv": "^16.4.5",
+    "openai": "^4.55.7",
+    "pdf-parse": "^1.1.1",
+    "zod": "^3.23.8"
+}
+
+"devDependencies": {
+    "@babel/preset-env": "^7.25.3",
+    "@babel/preset-typescript": "^7.24.7",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.3.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+}
+```
 
 ## Mock Environment
 Please ensure the below environment variable is set if you are in development.
